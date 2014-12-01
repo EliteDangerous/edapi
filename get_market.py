@@ -87,8 +87,8 @@ def parse_args():
 def add_station(system, station, distance=0.0):
     '''
     Add a station to data/Station.csv, and sort it.
-    This is a real PITA because Pythgon csv module sucks,
-    and TD basically does it's own thing.
+    This is a real PITA because the Python csv module sucks, and TD basically
+    does its own thing.
     '''
 
     # Open the current csv
