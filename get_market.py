@@ -84,6 +84,68 @@ def parse_args():
 
     return args
 
+def add_station(system, station, distance=0.0):
+    '''
+    Add a station to data/Station.csv, and sort it.
+    This is a real PITA because Pythgon csv module sucks,
+    and TD basically does it's own thing.
+    '''
+
+    # Open the current csv
+    reader = csv.reader(
+        open('data/Station.csv', 'r'),
+        delimiter=',',
+        quotechar="'",
+        doublequote=True
+    )
+
+    # Pull in the field names, in case they change again
+    fieldnames = next(reader)
+
+    # Pull in all the rows, casing them to proper types
+    result = [[
+        str(x[0]),
+        str(x[1]),
+        float(x[2])
+    ] for x in reader]
+
+    # Append the new station
+    result.append(
+        [
+            str(system),
+            str(station),
+            float(distance)
+        ]
+    )
+
+    # Sort the list
+    result.sort(
+        key=lambda k: (
+            k[0].lower(),
+            k[1].lower()
+        )
+    )
+
+    # Open Station.csv for write
+    fh = open('data/Station.csv', 'w')
+
+    # csv writer
+    writer = csv.writer(
+        fh,
+        delimiter=',',
+        quotechar="'",
+        doublequote=True,
+        quoting=csv.QUOTE_NONNUMERIC,
+        lineterminator="\n"
+    )
+
+    # Manually write the field names. The stupid csv module wants to quote
+    # these, but TD doesn't want that.
+    fh.write(fieldnames[0]+','+fieldnames[1]+','+fieldnames[2]+'\n')
+
+    # Write out the sorted station list
+    writer.writerows(result)
+
 #----------------------------------------------------------------
 # Classes.
 #----------------------------------------------------------------
@@ -343,13 +405,7 @@ def Main(args):
         if r != 'YES':
             print(bcolors.FAIL+'Aborting!'+bcolors.ENDC)
             sys.exit(1)
-        with open("data/Station.csv", "a") as myfile:
-            myfile.write("'{}','{}',0.0\n".format(
-                system.replace("'", "''"),
-                station.replace("'", "''")
-                )
-            )
-        myfile.close()
+        add_station(system, station)
     else:
         print(bcolors.OKGREEN+'Station found in station file.'+bcolors.ENDC)
 
