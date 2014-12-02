@@ -11,12 +11,14 @@ importing into TradeDangerous.
 
 Place get_market.py in the tradedangerous root, and execute it.
 
-Options:
+usage: get_market.py [-h] [--version] [--debug] [--vars] [--basename BASENAME]
 
-   --debug
-      Outputs additional debug info. Use when things go horribly wrong.
-
-   --vars
-      Write a small bash script to set some environment variables
-      for things like credits, insurance, current station, and cargo
-      capacity. Source this when executing trade.py to save typing.
+optional arguments:
+  -h, --help           show this help message and exit
+  --version            show program's version number and exit
+  --debug              Output additional debug info.
+  --vars               Output a file that sets environment variables for
+                       current cargo capacity, credits, insurance, and current
+                       system/station.
+  --basename BASENAME  Base file name. This is used to construct the cookie
+                       and vars file names. Defaults to "get_market"
