@@ -82,6 +82,12 @@ def parse_args():
                         for current cargo capacity, credits, insurance,\
                         and current system/station.")
 
+    # Base file name. 
+    parser.add_argument("--basename",
+                        default="get_market",
+                        help='Base file name. This is used to construct the\
+                        cookie and vars file names. Defaults to "get_market"')
+
     # Parse the command line.
     args = parser.parse_args()
 
@@ -180,7 +186,7 @@ class EDAPI:
 
     _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'
     _baseurl = 'https://companion.orerve.net/'
-    _basename = os.path.basename(__file__).replace('.py', '')
+    _basename = 'get_market'
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
@@ -190,6 +196,11 @@ class EDAPI:
         '''
 
         self.args = args
+
+        # Build common file names from basename.
+        self._basename = args.basename
+        self._cookiefile = self._basename + '.cookies'
+        self._envfile = self._basename + '.vars'
 
         if self.args.debug:
             debug = 1
