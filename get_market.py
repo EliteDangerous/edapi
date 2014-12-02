@@ -88,12 +88,24 @@ def parse_args():
                         help='Base file name. This is used to construct the\
                         cookie and vars file names. Defaults to "get_market"')
 
+    # tdpath.
+    # **EXPERIMENTAL**
+    # TODO: Currently requires some changes to TradeDB. Not ready for use.
+    parser.add_argument("--tdpath",
+                        default=".",
+                        help="Path to the TradeDangerous root. This is used to\
+                        locate the TradeDangerous python modules and data/\
+                        directory. Defaults to the cwd. **EXPERIMENTAL**")
+
     # Parse the command line.
     args = parser.parse_args()
 
+    # Fixup the tdpath
+    args.tdpath = os.path.abspath(args.tdpath)
+
     return args
 
-def add_station(system, station, distance=0.0):
+def add_station(system, station, args, distance=0.0):
     '''
     Add a station to data/Station.csv, and sort it.
     This is a real PITA because the Python csv module sucks, and TD basically
@@ -101,7 +113,7 @@ def add_station(system, station, distance=0.0):
     '''
 
     # Be OS friendly
-    csvFileName = os.path.abspath('data/Station.csv')
+    csvFileName = os.path.abspath(args.tdpath+'/data/Station.csv')
 
     # Open the current csv
     reader = csv.reader(
@@ -409,7 +421,7 @@ def Main(args):
             )
 
     # Check to see if this system is in the Stations file
-    myfile = csv.DictReader(open(os.path.abspath('data/Station.csv')),
+    myfile = csv.DictReader(open(os.path.abspath(args.tdpath+'/data/Station.csv')),
                             quotechar="'",
                             fieldnames=('system',
                                         'station',
@@ -431,7 +443,7 @@ def Main(args):
         if r != 'YES':
             print(bcolors.FAIL+'Aborting!'+bcolors.ENDC)
             sys.exit(1)
-        add_station(system, station)
+        add_station(system, station, args)
     else:
         print(bcolors.OKGREEN+'Station found in station file.'+bcolors.ENDC)
 
@@ -489,11 +501,17 @@ def Main(args):
     # to load the prices.
     print('Importing into TradeDangerous...')
 
+    # Insert the tdpath to python path so we can find the proper modules to
+    # import.
+    sys.path.insert(0, args.tdpath)
+
     # Setup TD
     import tradeenv
     tdenv = tradeenv.TradeEnv()
     import tradedb
-    tdb = tradedb.TradeDB(tdenv)
+    tdb = tradedb.TradeDB(
+        tdenv
+    )
     import cache
 
     # TD likes to use Path objects
