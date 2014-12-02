@@ -11,6 +11,7 @@ import http.cookiejar
 import json
 import os
 from pathlib import Path
+import platform
 from pprint import pprint
 import sys
 import tempfile
@@ -32,7 +33,7 @@ skip_categories = [
 
 # TD has different names for these
 cat_corrections = {
-    'Narcotics': 'Legal Drugs'
+        'Narcotics': 'Legal Drugs'
 }
 
 # TD has different names for these
@@ -62,16 +63,18 @@ def parse_args():
     # Basic argument parsing.
     parser = argparse.ArgumentParser(description='EDMS: Elite Dangerous Market Scraper')
 
-    # Add some base options.
+    # Version
     parser.add_argument('--version',
                         action='version',
                         version='%(prog)s '+__version__)
 
+    # Debug
     parser.add_argument("--debug",
                         action="store_true",
                         default=False,
                         help="Output additional debug info.")
 
+    # vars file
     parser.add_argument("--vars",
                         action="store_true",
                         default=False,
@@ -91,9 +94,12 @@ def add_station(system, station, distance=0.0):
     does its own thing.
     '''
 
+    # Be OS friendly
+    csvFileName = os.path.abspath('data/Station.csv')
+
     # Open the current csv
     reader = csv.reader(
-        open('data/Station.csv', 'r'),
+        open(csvFileName, 'r'),
         delimiter=',',
         quotechar="'",
         doublequote=True
@@ -127,7 +133,7 @@ def add_station(system, station, distance=0.0):
     )
 
     # Open Station.csv for write
-    fh = open('data/Station.csv', 'w')
+    fh = open(csvFileName, 'w')
 
     # csv writer
     writer = csv.writer(
@@ -152,12 +158,20 @@ def add_station(system, station, distance=0.0):
 
 # Some fun shell colors.
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+    if platform.system() is not 'Windows':
+        HEADER = '\033[95m'
+        OKBLUE = '\033[94m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        FAIL = '\033[91m'
+        ENDC = '\033[0m'
+    else:
+        HEADER = ''
+        OKBLUE = ''
+        OKGREEN = ''
+        WARNING = ''
+        FAIL = ''
+        ENDC = ''
 
 class EDAPI:
     '''
@@ -383,7 +397,7 @@ def Main(args):
             )
 
     # Check to see if this system is in the Stations file
-    myfile = csv.DictReader(open("data/Station.csv"),
+    myfile = csv.DictReader(open(os.path.abspath('data/Station.csv')),
                             quotechar="'",
                             fieldnames=('system',
                                         'station',
