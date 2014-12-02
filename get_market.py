@@ -31,12 +31,12 @@ skip_categories = [
         'NonMarketable',
 ]
 
-# TD has different names for these
+# TD has different names for these.
 cat_corrections = {
         'Narcotics': 'Legal Drugs'
 }
 
-# TD has different names for these
+# TD has different names for these.
 comm_corrections = {
         'Agricultural Medicines': 'Agri-Medicines',
         'Atmospheric Extractors': 'Atmospheric Processors',
@@ -78,9 +78,9 @@ def parse_args():
     parser.add_argument("--vars",
                         action="store_true",
                         default=False,
-                        help="Output a file that sets enviroment variables for\
-                        current cargo capcity, credits, insurance, and current\
-                        system/station.")
+                        help="Output a file that sets environment variables\
+                        for current cargo capacity, credits, insurance,\
+                        and current system/station.")
 
     # Parse the command line.
     args = parser.parse_args()
@@ -196,13 +196,14 @@ class EDAPI:
         else:
             debug = 0
 
-        # Create the cookie jar
+        # Create the cookie jar.
         self.cookie = http.cookiejar.MozillaCookieJar(self._cookiefile)
         try:
             self.cookie.load(ignore_discard=True, ignore_expires=True)
         except:
             self.cookie.save(ignore_discard=True, ignore_expires=True)
 
+        # Setup a custom opener.
         self.opener = urllib2.build_opener(
             urllib2.HTTPCookieProcessor(self.cookie),
             urllib2.HTTPRedirectHandler(),
@@ -257,7 +258,7 @@ class EDAPI:
         else:
                 response = self.opener.open(self._baseurl+uri, data)
 
-        # Debug info for the reponse.
+        # Debug info for the response.
         if self.args.debug:
             print(bcolors.HEADER+'-----')
             print('HTTP', response.code)
@@ -269,7 +270,7 @@ class EDAPI:
         # Save the cookies.
         self.cookie.save(ignore_discard=True, ignore_expires=True)
 
-        # Return the reponse object.
+        # Return the response object.
         return response
 
     def _getURI(self, uri, values=None):
@@ -278,7 +279,7 @@ class EDAPI:
         cookies are valid
         '''
 
-        # Try the URL. If our creditals are no good, try to
+        # Try the URL. If our credentials are no good, try to
         # login then ask again.
 
         response = self._getBasicURI(uri, values=values)
@@ -290,7 +291,7 @@ class EDAPI:
         if str(response.url).endswith('user/login'):
             sys.exit("Something went terribly wrong. The login credentials\
                      appear correct, but we are being denied access.\n\
-                     Try using --debug and let Eggplant know.")
+                     Try using --debug and report this.")
 
         return response
 
@@ -307,7 +308,7 @@ class EDAPI:
                 print('Current auth is valid!')
             return
 
-        # Performe the login POST
+        # Performe the login POST.
         values = {}
         values['email'] = input("User Name (email):")
         values['password'] = getpass.getpass()
