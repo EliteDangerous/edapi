@@ -509,14 +509,10 @@ def Main(args):
     # Setup TD
     import tradeenv
     tdenv = tradeenv.TradeEnv()
+    if args.tdpath is not '.':
+        tdenv.dataPath = args.tdpath+'/data'
     import tradedb
-    if args.tdpath is '.':
-        tdb = tradedb.TradeDB(tdenv)
-    else:
-        tdb = tradedb.TradeDB(
-            tdenv,
-            dataPath=args.tdpath+'/data'
-        )
+    tdb = tradedb.TradeDB(tdenv)
     import cache
 
     # TD likes to use Path objects
