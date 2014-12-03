@@ -106,7 +106,7 @@ def parse_args():
 
     return args
 
-def add_station(system, station, args, distance=0.0):
+def add_station(system, station, distance=0.0):
     '''
     Add a station to data/Station.csv, and sort it.
     This is a real PITA because the Python csv module sucks, and TD basically
@@ -203,7 +203,7 @@ class EDAPI:
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
-    def __init__(self, args):
+    def __init__(self):
         '''
         Initialize
         '''
@@ -357,13 +357,13 @@ class EDAPI:
 #----------------------------------------------------------------
 
 
-def Main(args):
+def Main():
     '''
     Main function.
     '''
 
     # Connect tot the API and grab all the info!
-    api = EDAPI(args)
+    api = EDAPI()
 
     # Print the commander profile
     print('Commander:', bcolors.OKGREEN+api.profile['commander']['name']+bcolors.ENDC)
@@ -444,7 +444,7 @@ def Main(args):
         if r != 'YES':
             print(bcolors.FAIL+'Aborting!'+bcolors.ENDC)
             sys.exit(1)
-        add_station(system, station, args)
+        add_station(system, station)
     else:
         print(bcolors.OKGREEN+'Station found in station file.'+bcolors.ENDC)
 
@@ -539,13 +539,14 @@ if __name__ == "__main__":
     try:
         # Parse any command line arguments.
         args = parse_args()
+        test = args
 
         # Command line overrides
         if args.debug is True:
             print('***** Debug mode *****')
 
         # Execute the Main() function and return results.
-        sys.exit(Main(args))
+        sys.exit(Main())
     except SystemExit as e:
         # Clean exit, provide a return code.
         sys.exit(e.code)
