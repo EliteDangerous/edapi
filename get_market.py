@@ -418,13 +418,6 @@ def Main():
     print('System:', c.OKBLUE+system+c.ENDC)
     print('Station:', c.OKBLUE+station+c.ENDC)
 
-    # Some sanity checking on the market
-    if 'commodities' not in api.profile['lastStarport']:
-        print(c.FAIL+'This station does not appear to have a commodity market.'+c.ENDC)
-        print('Keys for this station:')
-        pprint(api.profile['lastStarport'].keys())
-        sys.exit(1)
-
     # Write out an environment file.
     if args.vars:
         print('Writing {}...'.format(api._envfile))
@@ -473,6 +466,13 @@ def Main():
         add_station(system, station)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
+
+    # Some sanity checking on the market
+    if 'commodities' not in api.profile['lastStarport']:
+        print(c.FAIL+'This station does not appear to have a commodity market.'+c.ENDC)
+        print('Keys for this station:')
+        pprint(api.profile['lastStarport'].keys())
+        sys.exit(1)
 
     # Station exists. Prompt for import.
     print('Import station market with the current time stamp?')
