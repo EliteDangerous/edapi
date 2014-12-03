@@ -101,7 +101,8 @@ def parse_args():
     args = parser.parse_args()
 
     # Fixup the tdpath
-    args.tdpath = os.path.abspath(args.tdpath)
+    if args.tdpath is not '.':
+        args.tdpath = os.path.abspath(args.tdpath)
 
     return args
 
@@ -509,9 +510,13 @@ def Main(args):
     import tradeenv
     tdenv = tradeenv.TradeEnv()
     import tradedb
-    tdb = tradedb.TradeDB(
-        tdenv
-    )
+    if args.tdpath is '.':
+        tdb = tradedb.TradeDB(tdenv)
+    else:
+        tdb = tradedb.TradeDB(
+            tdenv,
+            dataPath=args.tdpath+'/data'
+        )
     import cache
 
     # TD likes to use Path objects
