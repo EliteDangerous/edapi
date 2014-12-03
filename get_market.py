@@ -97,6 +97,13 @@ def parse_args():
                         locate the TradeDangerous python modules and data/\
                         directory. Defaults to the cwd. **EXPERIMENTAL**")
 
+    # colors
+    parser.add_argument("--no-color",
+                        dest="color",
+                        action="store_false",
+                        default=True,
+                        help="Disable the use of ansi colors in output.")
+
     # Parse the command line.
     args = parser.parse_args()
 
@@ -104,7 +111,11 @@ def parse_args():
     if args.tdpath is not '.':
         args.tdpath = os.path.abspath(args.tdpath)
 
+    if args.debug:
+        pprint(args)
+
     return args
+
 
 def add_station(system, station, distance=0.0):
     '''
@@ -171,26 +182,32 @@ def add_station(system, station, distance=0.0):
     # Write out the sorted station list
     writer.writerows(result)
 
+
 #----------------------------------------------------------------
 # Classes.
 #----------------------------------------------------------------
 
 # Some fun shell colors.
-class bcolors:
-    if platform.system() is not 'Windows':
-        HEADER = '\033[95m'
-        OKBLUE = '\033[94m'
-        OKGREEN = '\033[92m'
-        WARNING = '\033[93m'
-        FAIL = '\033[91m'
-        ENDC = '\033[0m'
-    else:
-        HEADER = ''
-        OKBLUE = ''
-        OKGREEN = ''
-        WARNING = ''
-        FAIL = ''
-        ENDC = ''
+class ansiColors:
+    '''
+    Simple class for ansi colors
+    '''
+
+    defaults = {
+        'HEADER': '\033[95m',
+        'OKBLUE': '\033[94m',
+        'OKGREEN': '\033[92m',
+        'WARNING': '\033[93m',
+        'FAIL': '\033[91m',
+        'ENDC': '\033[0m',
+    }
+
+    def __init__(self):
+        if args.color:
+            self.__dict__.update(ansiColors.defaults)
+        else:
+            self.__dict__.update({n: '' for n in ansiColors.defaults.keys()})
+
 
 class EDAPI:
     '''
@@ -203,12 +220,16 @@ class EDAPI:
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
+
     def __init__(self):
         '''
         Initialize
         '''
 
         self.args = args
+
+        # Bash colors.
+        self.c = ansiColors()
 
         # Build common file names from basename.
         self._basename = args.basename
@@ -268,13 +289,13 @@ class EDAPI:
 
         # Debug info for the GET/POST.
         if self.args.debug:
-            print(bcolors.OKBLUE+'-----')
+            print(self.c.OKBLUE+'-----')
             if data is None:
                 print('GET: ', end='')
-                print(self._baseurl+uri, bcolors.ENDC)
+                print(self._baseurl+uri, self.c.ENDC)
             else:
                 print('POST: ', end='')
-                print(self._baseurl+uri, data, bcolors.ENDC)
+                print(self._baseurl+uri, data, self.c.ENDC)
 
         # Open the URL.
         if data is None:
@@ -284,18 +305,19 @@ class EDAPI:
 
         # Debug info for the response.
         if self.args.debug:
-            print(bcolors.HEADER+'-----')
+            print(self.c.HEADER+'-----')
             print('HTTP', response.code)
             print(response.url)
             print()
-            print(response.info(), bcolors.OKGREEN)
-            print(bcolors.ENDC)
+            print(response.info(), self.c.OKGREEN)
+            print(self.c.ENDC)
 
         # Save the cookies.
         self.cookie.save(ignore_discard=True, ignore_expires=True)
 
         # Return the response object.
         return response
+
 
     def _getURI(self, uri, values=None):
         '''
@@ -318,6 +340,7 @@ class EDAPI:
                      Try using --debug and report this.")
 
         return response
+
 
     def _doLogin(self):
         '''
@@ -352,10 +375,10 @@ class EDAPI:
             values['code'] = input("Code:")
             response = self._getBasicURI('user/confirm', values=values)
 
+
 #----------------------------------------------------------------
 # Main.
 #----------------------------------------------------------------
-
 
 def Main():
     '''
@@ -365,8 +388,11 @@ def Main():
     # Connect tot the API and grab all the info!
     api = EDAPI()
 
+    # Colors
+    c = ansiColors()
+
     # Print the commander profile
-    print('Commander:', bcolors.OKGREEN+api.profile['commander']['name']+bcolors.ENDC)
+    print('Commander:', c.OKGREEN+api.profile['commander']['name']+c.ENDC)
     print('Credits  : {:>11,d}'.format(api.profile['commander']['credits']))
     print('Debt     : {:>11,d}'.format(api.profile['commander']['debt']))
     print('Insurance: {:>11,d}'.format(api.profile['stats']['ship']['insurance']['value']))
@@ -383,18 +409,18 @@ def Main():
 
     # Sanity check that we are docked
     if not api.profile['commander']['docked']:
-        print(bcolors.WARNING+'Commander not docked.'+bcolors.ENDC)
-        print(bcolors.FAIL+'Aborting!'+bcolors.ENDC)
+        print(c.WARNING+'Commander not docked.'+c.ENDC)
+        print(c.FAIL+'Aborting!'+c.ENDC)
         sys.exit(1)
 
     system = api.profile['lastSystem']['name']
     station = api.profile['lastStarport']['name']
-    print('System:', bcolors.OKBLUE+system+bcolors.ENDC)
-    print('Station:', bcolors.OKBLUE+station+bcolors.ENDC)
+    print('System:', c.OKBLUE+system+c.ENDC)
+    print('Station:', c.OKBLUE+station+c.ENDC)
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
-        print(bcolors.FAIL+'This station does not appear to have a commodity market.'+bcolors.ENDC)
+        print(c.FAIL+'This station does not appear to have a commodity market.'+c.ENDC)
         print('Keys for this station:')
         pprint(api.profile['lastStarport'].keys())
         sys.exit(1)
@@ -438,21 +464,21 @@ def Main():
 
     # The station isn't in the stations file. Prompt to add it.
     if not found:
-        print(bcolors.WARNING+'WARNING! Station not in station file.'+bcolors.ENDC)
+        print(c.WARNING+'WARNING! Station not in station file.'+c.ENDC)
         print('Add this station to Station.csv? (Be SURE this is correct!)')
         r = input("Type YES: ")
         if r != 'YES':
-            print(bcolors.FAIL+'Aborting!'+bcolors.ENDC)
+            print(c.FAIL+'Aborting!'+c.ENDC)
             sys.exit(1)
         add_station(system, station)
     else:
-        print(bcolors.OKGREEN+'Station found in station file.'+bcolors.ENDC)
+        print(c.OKGREEN+'Station found in station file.'+c.ENDC)
 
     # Station exists. Prompt for import.
     print('Import station market with the current time stamp?')
     r = input("Type YES: ")
     if r != 'YES':
-        print(bcolors.FAIL+'Aborting!'+bcolors.ENDC)
+        print(c.FAIL+'Aborting!'+c.ENDC)
         sys.exit(1)
 
     print('Writing trade data...')
