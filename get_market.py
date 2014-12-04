@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import platform
 from pprint import pprint
+import sqlite3
 import sys
 import tempfile
 import traceback
@@ -199,7 +200,7 @@ class ansiColors:
         'OKGREEN': '\033[92m',
         'WARNING': '\033[93m',
         'FAIL': '\033[91m',
-        'ENDC': '\033[0m',
+        'ENDC': '\033[00m',
     }
 
     def __init__(self):
@@ -384,6 +385,9 @@ def Main():
     '''
     Main function.
     '''
+    # Insert the tdpath to python path so we can find the proper modules to
+    # import.
+    sys.path.insert(0, args.tdpath)
 
     # Connect tot the API and grab all the info!
     api = EDAPI()
@@ -481,6 +485,45 @@ def Main():
         print(c.FAIL+'Aborting!'+c.ENDC)
         sys.exit(1)
 
+    # Setup TD
+    print ('Initializing TradeDangerous...')
+    import tradeenv
+    tdenv = tradeenv.TradeEnv()
+    if args.tdpath is not '.':
+        tdenv.dataPath = args.tdpath+'/data'
+    import tradedb
+    tdb = tradedb.TradeDB(tdenv)
+    import cache
+
+    # Grab the old prices so we can print a comparison.
+    conn = sqlite3.connect(os.path.abspath(args.tdpath+'/data/TradeDangerous.db'))
+    conn.execute("PRAGMA foreign_keys=ON")
+    cur  = conn.cursor()
+
+    oldPrices = {n: (s, b) for (n, s, b) in cur.execute(
+        """
+        SELECT
+            Item.name,
+            vPrice.sell_to,
+            vPrice.buy_from
+        FROM
+            vPrice,
+            System,
+            Station,
+            Item
+        WHERE
+            Item.item_id = vPrice.item_id AND
+            System.name = '{}' AND
+            Station.name = '{}' AND
+            System.system_id = Station.system_id AND
+            Station.station_id = vPrice.station_id
+        ORDER BY vPrice.ui_order
+        """.format(
+            system,
+            station
+            )
+    )}
+
     print('Writing trade data...')
 
     # Find a temp file
@@ -489,6 +532,7 @@ def Main():
         print('Temp file is:', f.name)
 
     # Write out trade data
+    header = False
     f.write("@ {}/{}\n".format(system, station).encode('UTF-8'))
     for commodity in api.profile['lastStarport']['commodities']:
         if commodity['categoryname'] in skip_categories:
@@ -514,6 +558,45 @@ def Main():
         else:
             commodity['stock'] = str(commodity['stock'])+'?'
 
+        # Print price differences
+        oldCom = oldPrices.get(commodity['name'], (0,0))
+        diffSell = commodity['sellPrice'] - oldCom[0]
+        diffBuy = commodity['buyPrice'] - oldCom[1]
+
+        # Only print if the prices changed.
+        if (diffSell != 0 or diffBuy != 0):
+            if header is False:
+                header = True
+                print("{:>25} {:>13} {:>13}".format(
+                    'Commodity',
+                    'Sell Price',
+                    'Buy Price'
+                ))
+            if diffSell < 0:
+                sellColor = c.FAIL
+            elif diffSell > 0:
+                sellColor = c.OKGREEN
+            else:
+                sellColor = c.ENDC
+            if diffBuy < 0:
+                buyColor = c.FAIL
+            elif diffBuy > 0:
+                buyColor = c.OKGREEN
+            else:
+                buyColor = c.ENDC
+            if args.color:
+                s = "{:>25} {:>5}{:<17} {:>5}{:<17}"
+            else:
+                s = "{:>25} {:>5}{:<8} {:>5}{:<8}"
+            print(s.format(
+                commodity['name'],
+                commodity['sellPrice'],
+                '('+sellColor+"{:+d}".format(diffSell)+c.ENDC+')',
+                commodity['buyPrice'],
+                '('+buyColor+"{:+d}".format(diffBuy)+c.ENDC+')'
+                )
+            )
+
         f.write(
             "\t\t{} {} {} ? {}\n".format(
                 commodity['name'],
@@ -524,22 +607,8 @@ def Main():
         )
     f.close()
 
-    # All went well. Let's load up TradeDangerous and try
-    # to load the prices.
+    # All went well. Try the import.
     print('Importing into TradeDangerous...')
-
-    # Insert the tdpath to python path so we can find the proper modules to
-    # import.
-    sys.path.insert(0, args.tdpath)
-
-    # Setup TD
-    import tradeenv
-    tdenv = tradeenv.TradeEnv()
-    if args.tdpath is not '.':
-        tdenv.dataPath = args.tdpath+'/data'
-    import tradedb
-    tdb = tradedb.TradeDB(tdenv)
-    import cache
 
     # TD likes to use Path objects
     fpath = Path(f.name)
