@@ -49,6 +49,7 @@ comm_corrections = {
         'Fruit And Vegetables': 'Fruit and Vegetables',
         'Hazardous Environment Suits': 'H.E. Suits',
         'Heliostatic Furnaces': 'Microbial Furnaces',
+        'Marine Supplies': 'Marine Equipment',
         'Non Lethal Weapons': 'Non-Lethal Wpns',
         'Terrain Enrichment Systems': 'Land Enrichment Systems',
 }
