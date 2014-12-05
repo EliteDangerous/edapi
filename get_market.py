@@ -146,6 +146,12 @@ def parse_args():
                         default=True,
                         help="Disable the use of ansi colors in output.")
 
+    # Special stuff for Jeff
+    parser.add_argument("--jeffstuff",
+                        action="store_true",
+                        default=False,
+                        help="Output additional Jeff info.")
+
     # Parse the command line.
     args = parser.parse_args()
 
@@ -452,6 +458,13 @@ def Main():
     print('\tFederation:', api.profile['commander']['rank']['empire'])
     print('\t    Empire:', api.profile['commander']['rank']['federation'])
     print('Docked:', api.profile['commander']['docked'])
+
+    # Print special stuff for Jeff.
+    if args.jeffstuff:
+        print('Federation rank info:')
+        pprint(api.profile['stats']['ranks']['federation'])
+        print('Empire rank info:')
+        pprint(api.profile['stats']['ranks']['empire'])
 
     # Sanity check that we are docked
     if not api.profile['commander']['docked']:
