@@ -5,6 +5,8 @@
 
 import argparse
 import csv
+from datetime import datetime
+from datetime import tzinfo
 import getpass
 import http.client
 import http.cookiejar
@@ -455,16 +457,32 @@ def Main():
     print('\t   Explore: {} ({})'.format(explore_ranks[r['explore']], r['explore']))
     print('\t     Crime:', api.profile['commander']['rank']['crime'])
     print('\t   Service:', api.profile['commander']['rank']['service'])
-    print('\tFederation:', api.profile['commander']['rank']['empire'])
-    print('\t    Empire:', api.profile['commander']['rank']['federation'])
-    print('Docked:', api.profile['commander']['docked'])
 
     # Print special stuff for Jeff.
     if args.jeffstuff:
-        print('Federation rank info:')
-        pprint(api.profile['stats']['ranks']['federation'])
-        print('Empire rank info:')
-        pprint(api.profile['stats']['ranks']['empire'])
+        r = api.profile['stats']['ranks']['federation']
+        maxGT = max([r[x]['gt'] for x in r.keys()])
+        maxTS = max([r[x]['ts'] for x in r.keys()])
+        print('\tFederation: {} ({}) {}'.format(
+             api.profile['commander']['rank']['federation'],
+             maxGT,
+             datetime.fromtimestamp(maxTS).isoformat()
+            )
+        )
+        r = api.profile['stats']['ranks']['empire']
+        maxGT = max([r[x]['gt'] for x in r.keys()])
+        maxTS = max([r[x]['ts'] for x in r.keys()])
+        print('\t    Empire: {} ({}) {}'.format(
+             api.profile['commander']['rank']['empire'],
+             maxGT,
+             datetime.fromtimestamp(maxTS).isoformat()
+            )
+        )
+    else:
+        print('\tFederation:', api.profile['commander']['rank']['federation'])
+        print('\t    Empire:', api.profile['commander']['rank']['empire'])
+
+    print('Docked:', api.profile['commander']['docked'])
 
     # Sanity check that we are docked
     if not api.profile['commander']['docked']:
