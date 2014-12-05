@@ -30,5 +30,5 @@ optional arguments:
                        Defaults to the cwd. **EXPERIMENTAL**
   --no-color           Disable the use of ansi colors in output.
   --jeffstuff          Output additional Jeff info.
-  --yes, -y            Always accept new station names and import latest data
+  -y, --yes            Always accept new station names and import latest data
                        without prompting.

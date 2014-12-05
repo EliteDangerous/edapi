@@ -155,7 +155,7 @@ def parse_args():
                         help="Output additional Jeff info.")
 
     # Always add stations and import.
-    parser.add_argument("--yes", "-y",
+    parser.add_argument("-y", "--yes",
                         dest="yes",
                         action="store_true",
                         default=False,
