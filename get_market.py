@@ -563,7 +563,7 @@ def Main():
     import tradeenv
     tdenv = tradeenv.TradeEnv()
     if args.tdpath is not '.':
-        tdenv.dataPath = args.tdpath+'/data'
+        tdenv.dataDir = args.tdpath+'/data'
     import tradedb
     tdb = tradedb.TradeDB(tdenv)
     import cache
