@@ -154,6 +154,14 @@ def parse_args():
                         default=False,
                         help="Output additional Jeff info.")
 
+    # Always add stations and import.
+    parser.add_argument("--yes", "-y",
+                        dest="yes",
+                        action="store_true",
+                        default=False,
+                        help="Always accept new station names and import\
+                        latest data without prompting.")
+
     # Parse the command line.
     args = parser.parse_args()
 
@@ -535,11 +543,13 @@ def Main():
     # The station isn't in the stations file. Prompt to add it.
     if not found:
         print(c.WARNING+'WARNING! Station not in station file.'+c.ENDC)
-        print('Add this station to Station.csv? (Be SURE this is correct!)')
-        r = input("Type YES: ")
-        if r != 'YES':
-            print(c.FAIL+'Aborting!'+c.ENDC)
-            sys.exit(1)
+        if args.yes is False:
+            print('Add this station to Station.csv? (Be SURE this is correct!)')
+            r = input("Type YES: ")
+            if r != 'YES' and args.yes is False:
+                print(c.FAIL+'Aborting!'+c.ENDC)
+                sys.exit(1)
+        print('Adding station...')
         add_station(system, station)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
@@ -552,11 +562,12 @@ def Main():
         sys.exit(1)
 
     # Station exists. Prompt for import.
-    print('Import station market with the current time stamp?')
-    r = input("Type YES: ")
-    if r != 'YES':
-        print(c.FAIL+'Aborting!'+c.ENDC)
-        sys.exit(1)
+    if args.yes is False:
+        print('Import station market with the current time stamp?')
+        r = input("Type YES: ")
+        if r != 'YES':
+            print(c.FAIL+'Aborting!'+c.ENDC)
+            sys.exit(1)
 
     # Setup TD
     print ('Initializing TradeDangerous...')

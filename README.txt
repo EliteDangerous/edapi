@@ -12,6 +12,9 @@ importing into TradeDangerous.
 Place get_market.py in the tradedangerous root, and execute it.
 
 usage: get_market.py [-h] [--version] [--debug] [--vars] [--basename BASENAME]
+                     [--tdpath TDPATH] [--no-color] [--jeffstuff] [--yes]
+
+EDMS: Elite Dangerous Market Scraper
 
 optional arguments:
   -h, --help           show this help message and exit
@@ -22,3 +25,10 @@ optional arguments:
                        system/station.
   --basename BASENAME  Base file name. This is used to construct the cookie
                        and vars file names. Defaults to "get_market"
+  --tdpath TDPATH      Path to the TradeDangerous root. This is used to locate
+                       the TradeDangerous python modules and data/ directory.
+                       Defaults to the cwd. **EXPERIMENTAL**
+  --no-color           Disable the use of ansi colors in output.
+  --jeffstuff          Output additional Jeff info.
+  --yes, -y            Always accept new station names and import latest data
+                       without prompting.
