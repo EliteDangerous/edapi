@@ -55,6 +55,46 @@ comm_corrections = {
 }
 
 #----------------------------------------------------------------
+# Some lookup tables.
+#----------------------------------------------------------------
+
+combat_ranks = (
+    'Harmless',
+    'Mostly Harmless',
+    'Novice',
+    'Competent',
+    'Expert',
+    'Master',
+    'Dangerous',
+    'Deadly',
+    'Elite',
+)
+
+trade_ranks = (
+    'Penniless',
+    'Mostly Penniless',
+    'Pedlar',
+    'Dealer',
+    'Merchant',
+    'Broker',
+    'Rank 7',
+    'Rank 8',
+    'Rank 9',
+)
+
+explore_ranks = (
+    'Aimless',
+    'Mostly Aimless',
+    'Scout',
+    'Rank 4',
+    'Rank 5',
+    'Rank 6',
+    'Rank 7',
+    'Rank 8',
+    'Rank 9',
+)
+
+#----------------------------------------------------------------
 # Functions.
 #----------------------------------------------------------------
 
@@ -403,10 +443,11 @@ def Main():
     print('Insurance: {:>11,d}'.format(api.profile['stats']['ship']['insurance']['value']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))
     print('Ranks    :')
-    print('\t    Combat:', api.profile['commander']['rank']['combat'])
-    print('\t     Trade:', api.profile['commander']['rank']['trade'])
+    r = api.profile['commander']['rank']
+    print('\t    Combat: {} ({})'.format(combat_ranks[r['combat']], r['combat']))
+    print('\t     Trade: {} ({})'.format(trade_ranks[r['trade']], r['trade']))
+    print('\t   Explore: {} ({})'.format(explore_ranks[r['explore']], r['explore']))
     print('\t     Crime:', api.profile['commander']['rank']['crime'])
-    print('\t   Explore:', api.profile['commander']['rank']['explore'])
     print('\t   Service:', api.profile['commander']['rank']['service'])
     print('\tFederation:', api.profile['commander']['rank']['empire'])
     print('\t    Empire:', api.profile['commander']['rank']['federation'])
