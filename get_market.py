@@ -60,41 +60,85 @@ comm_corrections = {
 # Some lookup tables.
 #----------------------------------------------------------------
 
-combat_ranks = (
-    'Harmless',
-    'Mostly Harmless',
-    'Novice',
-    'Competent',
-    'Expert',
-    'Master',
-    'Dangerous',
-    'Deadly',
-    'Elite',
-)
-
-trade_ranks = (
-    'Penniless',
-    'Mostly Penniless',
-    'Pedlar',
-    'Dealer',
-    'Merchant',
-    'Broker',
-    'Rank 7',
-    'Rank 8',
-    'Rank 9',
-)
-
-explore_ranks = (
-    'Aimless',
-    'Mostly Aimless',
-    'Scout',
-    'Rank 4',
-    'Rank 5',
-    'Rank 6',
-    'Rank 7',
-    'Rank 8',
-    'Rank 9',
-)
+rank_names = {
+    'combat': (
+        'Harmless',
+        'Mostly Harmless',
+        'Novice',
+        'Competent',
+        'Expert',
+        'Master',
+        'Dangerous',
+        'Deadly',
+        'Elite',
+    ),
+    'crime': (
+        'Rank 0',
+        'Rank 1',
+        'Rank 2',
+        'Rank 3',
+        'Rank 4',
+        'Rank 5',
+        'Rank 6',
+        'Rank 7',
+        'Rank 8',
+    ),
+    'empire': (
+        'Rank 0',
+        'Rank 1',
+        'Rank 2',
+        'Rank 3',
+        'Rank 4',
+        'Rank 5',
+        'Rank 6',
+        'Rank 7',
+        'Rank 8',
+    ),
+    'explore': (
+        'Aimless',
+        'Mostly Aimless',
+        'Scout',
+        'Rank 4',
+        'Rank 5',
+        'Rank 6',
+        'Rank 7',
+        'Rank 8',
+        'Rank 9',
+    ),
+    'federation': (
+        'Rank 0',
+        'Rank 1',
+        'Rank 2',
+        'Rank 3',
+        'Rank 4',
+        'Rank 5',
+        'Rank 6',
+        'Rank 7',
+        'Rank 8',
+    ),
+    'service': (
+        'Rank 0',
+        'Rank 1',
+        'Rank 2',
+        'Rank 3',
+        'Rank 4',
+        'Rank 5',
+        'Rank 6',
+        'Rank 7',
+        'Rank 8',
+    ),
+    'trade': (
+        'Penniless',
+        'Mostly Penniless',
+        'Pedlar',
+        'Dealer',
+        'Merchant',
+        'Broker',
+        'Rank 7',
+        'Rank 8',
+        'Rank 9',
+    ),
+}
 
 #----------------------------------------------------------------
 # Functions.
@@ -459,36 +503,35 @@ def Main():
     print('Insurance: {:>11,d}'.format(api.profile['stats']['ship']['insurance']['value']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))
     print('Ranks    :')
-    r = api.profile['commander']['rank']
-    print('\t    Combat: {} ({})'.format(combat_ranks[r['combat']], r['combat']))
-    print('\t     Trade: {} ({})'.format(trade_ranks[r['trade']], r['trade']))
-    print('\t   Explore: {} ({})'.format(explore_ranks[r['explore']], r['explore']))
-    print('\t     Crime:', api.profile['commander']['rank']['crime'])
-    print('\t   Service:', api.profile['commander']['rank']['service'])
-
-    # Print special stuff for Jeff.
-    if args.jeffstuff:
-        r = api.profile['stats']['ranks']['federation']
-        maxGT = max([r[x]['gt'] for x in r.keys()])
-        maxTS = max([r[x]['ts'] for x in r.keys()])
-        print('\tFederation: {} ({}) {}'.format(
-             api.profile['commander']['rank']['federation'],
-             maxGT,
-             datetime.fromtimestamp(maxTS).isoformat()
+    print("\t+------------+------------------+---+-----------+---------------------+")
+    print("\t| Rank Type  |        Rank Name | R |        GT | Timestamp           |")
+    print("\t+------------+------------------+---+-----------+---------------------+")
+    r = api.profile['stats']['ranks']
+    for rankType in sorted(api.profile['commander']['rank']):
+        rank = api.profile['commander']['rank'][rankType]
+        if rankType in rank_names:
+            rankName = rank_names[rankType][rank]
+        else:
+            rankName = ''
+        if rankType in r:
+            maxGT = max([r[rankType][x]['gt'] for x in r[rankType].keys()])
+            maxTS = max([r[rankType][x]['ts'] for x in r[rankType].keys()])
+        else:
+            maxGT = ''
+            maxTS = 0
+        if maxTS:
+            maxTS = datetime.fromtimestamp(maxTS).isoformat()
+        else:
+            maxTS = ''
+        print("\t| {:>10} | {:>16} | {:1} | {:>9} | {:19} |".format(
+            rankType,
+            rankName,
+            rank,
+            maxGT,
+            maxTS
             )
         )
-        r = api.profile['stats']['ranks']['empire']
-        maxGT = max([r[x]['gt'] for x in r.keys()])
-        maxTS = max([r[x]['ts'] for x in r.keys()])
-        print('\t    Empire: {} ({}) {}'.format(
-             api.profile['commander']['rank']['empire'],
-             maxGT,
-             datetime.fromtimestamp(maxTS).isoformat()
-            )
-        )
-    else:
-        print('\tFederation:', api.profile['commander']['rank']['federation'])
-        print('\t    Empire:', api.profile['commander']['rank']['empire'])
+    print("\t+------------+------------------+---+-----------+---------------------+")
 
     print('Docked:', api.profile['commander']['docked'])
 
