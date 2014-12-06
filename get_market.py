@@ -285,6 +285,38 @@ def add_station(system, station, distance=0.0):
     writer.writerows(result)
 
 
+def convertSecs(seconds):
+    '''
+    Convert a number of seconds to a string.
+    '''
+    if not isinstance(seconds, int):
+        return seconds 
+
+    days = seconds // 86400
+    seconds %= 86400
+    hours = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+
+    result = "{:2d}m {:2d}s".format(
+        minutes,
+        seconds
+    )
+
+    if hours or days:
+        result = "{:2d}h ".format(
+            hours
+        )+result
+
+    if days:
+        result = "{:2d}d ".format(
+            days
+        )+result
+
+    return result
+
+
 #----------------------------------------------------------------
 # Classes.
 #----------------------------------------------------------------
@@ -502,10 +534,9 @@ def Main():
     print('Debt     : {:>11,d}'.format(api.profile['commander']['debt']))
     print('Insurance: {:>11,d}'.format(api.profile['stats']['ship']['insurance']['value']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))
-    print('Ranks    :')
-    print("\t+------------+------------------+---+-----------+---------------------+")
-    print("\t| Rank Type  |        Rank Name | R |        GT | Timestamp           |")
-    print("\t+------------+------------------+---+-----------+---------------------+")
+    print("+------------+------------------+---+--------------+---------------------+")
+    print("|  Rank Type |        Rank Name | # |    Game Time |           Timestamp |")
+    print("+------------+------------------+---+--------------+---------------------+")
     r = api.profile['stats']['ranks']
     for rankType in sorted(api.profile['commander']['rank']):
         rank = api.profile['commander']['rank'][rankType]
@@ -523,15 +554,15 @@ def Main():
             maxTS = datetime.fromtimestamp(maxTS).isoformat()
         else:
             maxTS = ''
-        print("\t| {:>10} | {:>16} | {:1} | {:>9} | {:19} |".format(
+        print("| {:>10} | {:>16} | {:1} | {:>12} | {:19} |".format(
             rankType,
             rankName,
             rank,
-            maxGT,
+            convertSecs(maxGT),
             maxTS
             )
         )
-    print("\t+------------+------------------+---+-----------+---------------------+")
+    print("+------------+------------------+---+--------------+---------------------+")
 
     print('Docked:', api.profile['commander']['docked'])
 
