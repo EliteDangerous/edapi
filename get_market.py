@@ -530,9 +530,10 @@ def Main():
 
     # Print the commander profile
     print('Commander:', c.OKGREEN+api.profile['commander']['name']+c.ENDC)
-    print('Credits  : {:>11,d}'.format(api.profile['commander']['credits']))
-    print('Debt     : {:>11,d}'.format(api.profile['commander']['debt']))
-    print('Insurance: {:>11,d}'.format(api.profile['stats']['ship']['insurance']['value']))
+    print('Game Time: {:>12}'.format(convertSecs(api.profile['stats']['game_time'])))
+    print('Credits  : {:>12,d}'.format(api.profile['commander']['credits']))
+    print('Debt     : {:>12,d}'.format(api.profile['commander']['debt']))
+    print('Insurance: {:>12,d}'.format(api.profile['stats']['ship']['insurance']['value']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))
     print("+------------+------------------+---+--------------+---------------------+")
     print("|  Rank Type |        Rank Name | # |    Game Time |           Timestamp |")
