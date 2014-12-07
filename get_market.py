@@ -176,14 +176,12 @@ def parse_args():
                         help='Base file name. This is used to construct the\
                         cookie and vars file names. Defaults to "get_market"')
 
-    # tdpath.
-    # **EXPERIMENTAL**
-    # TODO: Currently requires some changes to TradeDB. Not ready for use.
+    # tdpath
     parser.add_argument("--tdpath",
                         default=".",
                         help="Path to the TradeDangerous root. This is used to\
                         locate the TradeDangerous python modules and data/\
-                        directory. Defaults to the cwd. **EXPERIMENTAL**")
+                        directory. Defaults to the cwd.")
 
     # colors
     parser.add_argument("--no-color",
@@ -676,7 +674,7 @@ def Main():
             Station.name = '{}' AND
             System.system_id = Station.system_id AND
             Station.station_id = vPrice.station_id
-        ORDER BY vPrice.ui_order
+        ORDER BY Item.ui_order
         """.format(
             system,
             station
