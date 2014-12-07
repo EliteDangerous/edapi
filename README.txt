@@ -9,10 +9,11 @@ importing into TradeDangerous.
 == Usage:
 ==============================================================================
 
-Place get_market.py in the tradedangerous root, and execute it.
+Either place get_market.py in the TradeDangerous root, or tell it where to
+find TradeDangerous with the --tdpath option.
 
 usage: get_market.py [-h] [--version] [--debug] [--vars] [--basename BASENAME]
-                     [--tdpath TDPATH] [--no-color] [--jeffstuff] [--yes]
+                     [--tdpath TDPATH] [--no-color] [--jeffstuff] [-y]
 
 EDMS: Elite Dangerous Market Scraper
 
@@ -27,7 +28,7 @@ optional arguments:
                        and vars file names. Defaults to "get_market"
   --tdpath TDPATH      Path to the TradeDangerous root. This is used to locate
                        the TradeDangerous python modules and data/ directory.
-                       Defaults to the cwd. **EXPERIMENTAL**
+                       Defaults to the cwd.
   --no-color           Disable the use of ansi colors in output.
   --jeffstuff          Output additional Jeff info.
   -y, --yes            Always accept new station names and import latest data
