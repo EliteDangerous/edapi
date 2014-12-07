@@ -84,7 +84,7 @@ rank_names = {
         'Rank 8',
     ),
     'empire': (
-        'Rank 0',
+        'None',
         'Rank 1',
         'Rank 2',
         'Rank 3',
@@ -106,7 +106,7 @@ rank_names = {
         'Rank 9',
     ),
     'federation': (
-        'Rank 0',
+        'None',
         'Rank 1',
         'Rank 2',
         'Rank 3',
