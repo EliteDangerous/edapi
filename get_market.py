@@ -620,7 +620,12 @@ def Main():
                 print(c.FAIL+'Aborting!'+c.ENDC)
                 sys.exit(1)
         print('Adding station...')
-        add_station(system, station)
+        distance = input("Optional distance from star (enter for 0.0): ")
+        try:
+            distance = float(distance)
+        except:
+            distance = 0.0
+        add_station(system, station, distance)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
 
