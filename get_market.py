@@ -290,26 +290,23 @@ def convertSecs(seconds):
     if not isinstance(seconds, int):
         return seconds 
 
-    days = seconds // 86400
-    seconds %= 86400
     hours = seconds // 3600
     seconds %= 3600
     minutes = seconds // 60
     seconds %= 60
 
-    result = "{:2d}m {:2d}s".format(
-        minutes,
+    result = "{:2d}s".format(
         seconds
     )
 
-    if hours or days:
-        result = "{:2d}h ".format(
-            hours
+    if minutes or hours:
+        result = "{:2d}m ".format(
+            minutes
         )+result
 
-    if days:
-        result = "{:2d}d ".format(
-            days
+    if hours:
+        result = "{:2d}h ".format(
+            hours
         )+result
 
     return result
@@ -533,9 +530,9 @@ def Main():
     print('Debt     : {:>12,d}'.format(api.profile['commander']['debt']))
     print('Insurance: {:>12,d}'.format(api.profile['stats']['ship']['insurance']['value']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))
-    print("+------------+------------------+---+--------------+---------------------+")
-    print("|  Rank Type |        Rank Name | # |    Game Time |           Timestamp |")
-    print("+------------+------------------+---+--------------+---------------------+")
+    print("+------------+------------------+---+---------------+---------------------+")
+    print("|  Rank Type |        Rank Name | # |     Game Time |           Timestamp |")
+    print("+------------+------------------+---+---------------+---------------------+")
     r = api.profile['stats']['ranks']
     for rankType in sorted(api.profile['commander']['rank']):
         rank = api.profile['commander']['rank'][rankType]
@@ -553,7 +550,7 @@ def Main():
             maxTS = datetime.fromtimestamp(maxTS).isoformat()
         else:
             maxTS = ''
-        print("| {:>10} | {:>16} | {:1} | {:>12} | {:19} |".format(
+        print("| {:>10} | {:>16} | {:1} | {:>13} | {:19} |".format(
             rankType,
             rankName,
             rank,
@@ -561,7 +558,7 @@ def Main():
             maxTS
             )
         )
-    print("+------------+------------------+---+--------------+---------------------+")
+    print("+------------+------------------+---+---------------+---------------------+")
 
     print('Docked:', api.profile['commander']['docked'])
 
