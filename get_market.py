@@ -91,7 +91,7 @@ rank_names = {
         'Rank 4',
         'Rank 5',
         'Rank 6',
-        'Rank 7',
+        'Baron',
         'Rank 8',
     ),
     'explore': (
