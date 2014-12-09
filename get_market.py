@@ -113,7 +113,7 @@ rank_names = {
         'Rank 4',
         'Rank 5',
         'Rank 6',
-        'Rank 7',
+        'Ensign',
         'Rank 8',
     ),
     'service': (
@@ -203,6 +203,12 @@ def parse_args():
                         default=False,
                         help="Always accept new station names and import\
                         latest data without prompting.")
+
+    # shipyard
+    parser.add_argument("--shipyard",
+                        action="store_true",
+                        default=False,
+                        help="Print shipyard info.")
 
     # Parse the command line.
     args = parser.parse_args()
@@ -628,6 +634,13 @@ def Main():
         add_station(system, station, distance)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
+
+    # Output the shipyard if asked.
+    if args.shipyard:
+        if 'ships' in api.profile['lastStarport']:
+            pprint(api.profile['lastStarport']['ships'])
+        else:
+            print('No shipyard found!')
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
