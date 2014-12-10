@@ -204,11 +204,19 @@ def parse_args():
                         help="Always accept new station names and import\
                         latest data without prompting.")
 
-    # shipyard
-    parser.add_argument("--shipyard",
+    # keys
+    parser.add_argument("--keys",
+                        action="append",
+                        nargs="*",
+                        help="Instead of normal import, display raw API data\
+                        given a set of dictionary keys.")
+
+    # tree
+    parser.add_argument("--tree",
                         action="store_true",
                         default=False,
-                        help="Print shipyard info.")
+                        help="Used with --keys. If present will print all\
+                        content below the specificed key.")
 
     # Parse the command line.
     args = parser.parse_args()
@@ -565,8 +573,41 @@ def Main():
             )
         )
     print("+------------+------------------+---+---------------+---------------------+")
-
     print('Docked:', api.profile['commander']['docked'])
+
+    # User specified the --keys option. Use this to display some subzet of the
+    # API response and exit.
+    if args.keys is not None:
+        # A little legend.
+        for key in args.keys[0]:
+            print(key, end="->")
+        print()
+
+        # Start a thr root
+        ref = api.profile
+        # Try to walk the tree
+        for key in args.keys[0]:
+            try:
+                if key in ref.keys():
+                    ref = ref[key]
+            except:
+                print("key:", key)
+                print("not found. Contents at previous key:")
+                try:
+                    pprint(sorted(ref.keys()))
+                except:
+                    pprint(ref)
+                sys.exit(1)
+        # Print whatever we found here.
+        try:
+            if args.tree:
+                pprint(ref)
+            else:
+                pprint(sorted(ref.keys()))
+        except:
+            pprint(ref)
+        # Exit without doing anything else.
+        sys.exit()
 
     # Sanity check that we are docked
     if not api.profile['commander']['docked']:
@@ -634,13 +675,6 @@ def Main():
         add_station(system, station, distance)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
-
-    # Output the shipyard if asked.
-    if args.shipyard:
-        if 'ships' in api.profile['lastStarport']:
-            pprint(api.profile['lastStarport']['ships'])
-        else:
-            print('No shipyard found!')
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
