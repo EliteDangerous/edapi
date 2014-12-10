@@ -103,7 +103,7 @@ rank_names = {
         'Rank 6',
         'Rank 7',
         'Rank 8',
-        'Rank 9',
+        'Elite',
     ),
     'federation': (
         'None',
@@ -136,7 +136,7 @@ rank_names = {
         'Broker',
         'Rank 7',
         'Rank 8',
-        'Rank 9',
+        'Elite',
     ),
 }
 
