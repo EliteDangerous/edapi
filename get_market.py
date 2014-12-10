@@ -167,8 +167,8 @@ def parse_args():
                         action="store_true",
                         default=False,
                         help="Output a file that sets environment variables\
-                        for current cargo capacity, credits, insurance,\
-                        and current system/station.")
+                        for current cargo capacity, credits, and current\
+                        system/station.")
 
     # Base file name. 
     parser.add_argument("--basename",
@@ -542,7 +542,6 @@ def Main():
     print('Game Time: {:>12}'.format(convertSecs(api.profile['stats']['game_time'])))
     print('Credits  : {:>12,d}'.format(api.profile['commander']['credits']))
     print('Debt     : {:>12,d}'.format(api.profile['commander']['debt']))
-    print('Insurance: {:>12,d}'.format(api.profile['stats']['ship']['insurance']['value']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))
     print("+------------+------------------+---+---------------+---------------------+")
     print("|  Rank Type |        Rank Name | # |     Game Time |           Timestamp |")
@@ -631,10 +630,6 @@ def Main():
             )
             myfile.write('export TDCREDITS={}\n'.format(
                     api.profile['commander']['credits']
-                )
-            )
-            myfile.write('export TDINS={}\n'.format(
-                    api.profile['stats']['ship']['insurance']['value']
                 )
             )
             myfile.write('export TDCAP={}\n'.format(
