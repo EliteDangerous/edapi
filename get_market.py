@@ -134,7 +134,7 @@ rank_names = {
         'Dealer',
         'Merchant',
         'Broker',
-        'Rank 7',
+        'Entrepreneur',
         'Rank 8',
         'Elite',
     ),
