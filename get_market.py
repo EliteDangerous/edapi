@@ -587,8 +587,7 @@ def Main():
         # Try to walk the tree
         for key in args.keys[0]:
             try:
-                if key in ref.keys():
-                    ref = ref[key]
+                ref = ref[key]
             except:
                 print("key:", key)
                 print("not found. Contents at previous key:")
