@@ -29,18 +29,24 @@ __version__ = '.'.join(__version_info__)
 # Deal with some differences in names between TD, ED and the API.
 #----------------------------------------------------------------
 
-# Not real items?
-skip_categories = [
+# Categories to ignore. Drones end up here. No idea what they are.
+cat_ignore = [
         'NonMarketable',
 ]
 
 # TD has different names for these.
-cat_corrections = {
+cat_correct = {
         'Narcotics': 'Legal Drugs'
 }
 
+# Commodities to ignore. Don't try to pass these to TD. This is mostly for
+# rares.
+comm_ignore = (
+    'Lavian Brandy',
+)
+
 # TD has different names for these.
-comm_corrections = {
+comm_correct = {
         'Agricultural Medicines': 'Agri-Medicines',
         'Atmospheric Extractors': 'Atmospheric Processors',
         'Auto Fabricators': 'Auto-Fabricators',
@@ -735,14 +741,17 @@ def Main():
     header = False
     f.write("@ {}/{}\n".format(system, station).encode('UTF-8'))
     for commodity in api.profile['lastStarport']['commodities']:
-        if commodity['categoryname'] in skip_categories:
+        if commodity['categoryname'] in cat_ignore:
             continue
 
-        if commodity['categoryname'] in cat_corrections:
-            commodity['categoryname'] = cat_corrections[commodity['categoryname']]
+        if commodity['name'] in comm_ignore:
+            continue
 
-        if commodity['name'] in comm_corrections:
-            commodity['name'] = comm_corrections[commodity['name']]
+        if commodity['categoryname'] in cat_correct:
+            commodity['categoryname'] = cat_correct[commodity['categoryname']]
+
+        if commodity['name'] in comm_correct:
+            commodity['name'] = comm_correct[commodity['name']]
 
         f.write(
             "\t+ {}\n".format(
