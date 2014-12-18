@@ -197,12 +197,6 @@ def parse_args():
                         default=True,
                         help="Disable the use of ansi colors in output.")
 
-    # Special stuff for Jeff
-    parser.add_argument("--jeffstuff",
-                        action="store_true",
-                        default=False,
-                        help="Output additional Jeff info.")
-
     # Always add stations and import.
     parser.add_argument("-y", "--yes",
                         dest="yes",
