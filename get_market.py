@@ -42,6 +42,7 @@ cat_correct = {
 # Commodities to ignore. Don't try to pass these to TD. This is mostly for
 # rares.
 comm_ignore = (
+    'Alien Eggs',
     'Lavian Brandy',
 )
 
@@ -91,8 +92,8 @@ rank_names = {
     ),
     'empire': (
         'None',
-        'Rank 1',
-        'Rank 2',
+        'Outsider',
+        'Serf',
         'Rank 3',
         'Rank 4',
         'Rank 5',
@@ -107,7 +108,7 @@ rank_names = {
         'Surveyor',
         'Trailblazer',
         'Pathfinder',
-        'Rank 7',
+        'Ranger',
         'Rank 8',
         'Elite',
     ),
