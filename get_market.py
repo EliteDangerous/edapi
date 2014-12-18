@@ -114,8 +114,8 @@ rank_names = {
     ),
     'federation': (
         'None',
-        'Rank 1',
-        'Rank 2',
+        'Recruit',
+        'Midshipman',
         'Rank 3',
         'Rank 4',
         'Rank 5',
