@@ -96,7 +96,9 @@ rank_names = {
         'Knight',
         'Lord',
         'Baron',
-        'Rank 8',
+        'Viscount',
+        'Count',
+        'Earl',
     ),
     'explore': (
         'Aimless',
