@@ -53,13 +53,10 @@ comm_correct = {
         'Auto Fabricators': 'Auto-Fabricators',
         'Basic Narcotics': 'Narcotics',
         'Bio Reducing Lichen': 'Bioreducing Lichen',
-        'Consumer Technology': 'Consumer Tech',
-        'Domestic Appliances': 'Dom. Appliances',
-        'Fruit And Vegetables': 'Fruit and Vegetables',
         'Hazardous Environment Suits': 'H.E. Suits',
         'Heliostatic Furnaces': 'Microbial Furnaces',
         'Marine Supplies': 'Marine Equipment',
-        'Non Lethal Weapons': 'Non-Lethal Wpns',
+        'Non Lethal Weapons': 'Non-Lethal Weapons',
         'Terrain Enrichment Systems': 'Land Enrichment Systems',
 }
 
