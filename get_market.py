@@ -759,7 +759,7 @@ def Main():
         if commodity['stock'] == 0:
             commodity['stock'] = '-'
         else:
-            commodity['stock'] = str(commodity['stock'])+'?'
+            commodity['stock'] = str(int(commodity['stock']))+'?'
 
         # Print price differences
         oldCom = oldPrices.get(commodity['name'], (0,0))
