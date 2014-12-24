@@ -781,9 +781,9 @@ def Main():
                 sellColor = c.OKGREEN
             else:
                 sellColor = c.ENDC
-            if diffBuy < 0:
+            if diffBuy > 0:
                 buyColor = c.FAIL
-            elif diffBuy > 0:
+            elif diffBuy < 0:
                 buyColor = c.OKGREEN
             else:
                 buyColor = c.ENDC
