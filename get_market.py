@@ -255,7 +255,7 @@ def read_stations():
     result = [[
         str(x[0]),
         str(x[1]),
-        float(x[2]),
+        int(x[2]),
         str(x[3]),
         str(x[4])
     ] for x in reader]
@@ -300,7 +300,7 @@ def write_stations(fieldnames, stations):
     writer.writerows(stations)
 
 
-def add_station(system, station, distance=0.0, blackmarket='?', max_pad_size='?',
+def add_station(system, station, distance=0, blackmarket='?', max_pad_size='?',
         fieldnames=None,
         stations=None
     ):
@@ -317,9 +317,9 @@ def add_station(system, station, distance=0.0, blackmarket='?', max_pad_size='?'
 
     # Sanity check the station data.
     try:
-        distance = float(distance)
+        distance = int(distance)
     except:
-        distance = 0.0
+        distance = 0
 
     blackmarket = blackmarket.upper()
     if blackmarket not in ('?', 'Y', 'N'):
@@ -363,7 +363,7 @@ def update_station(system, station, distance=None, blackmarket=None, max_pad_siz
             station.lower() == item[1].lower()):
             # Update the distance
             if distance is not None:
-                stations[i][2] = float(distance)
+                stations[i][2] = int(distance)
 
             # Update the black market.
             if blackmarket is not None:
@@ -732,7 +732,7 @@ def Main():
                                        )
                            )
     found = False
-    distance = 0.0
+    distance = 0
     blackmarket = '?'
     max_pad_size = '?'
     for row in myfile:
@@ -754,15 +754,15 @@ def Main():
                 print(c.FAIL+'Aborting!'+c.ENDC)
                 sys.exit(1)
         print('Adding station...')
-        distance = input("Distance from star (enter for 0.0): ")
+        distance = input("Distance from star (enter for 0): ")
         blackmarket = input("Black market present (Y, N or enter for ?): ")
         max_pad_size = input("Max pad size (S, M, L or enter for ?): ")
         add_station(system, station, distance, blackmarket, max_pad_size)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
         modified = False
-        if distance == 0.0:
-            distance = input("Update distance from star (enter for 0.0): ")
+        if int(distance) == 0:
+            distance = input("Update distance from star (enter for 0): ")
             if distance is not '':
                 modified = True
         if blackmarket is '?':
