@@ -255,7 +255,7 @@ def read_stations():
     result = [[
         str(x[0]),
         str(x[1]),
-        int(x[2]),
+        int(round(float(x[2]))),
         str(x[3]),
         str(x[4])
     ] for x in reader]
@@ -319,7 +319,10 @@ def add_station(system, station, distance=0, blackmarket='?', max_pad_size='?',
     try:
         distance = int(distance)
     except:
-        distance = 0
+        try:
+            distance = float(distance)
+        except:
+            distance = 0
 
     blackmarket = blackmarket.upper()
     if blackmarket not in ('?', 'Y', 'N'):
@@ -761,7 +764,7 @@ def Main():
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
         modified = False
-        if int(distance) == 0:
+        if float(distance) == 0:
             distance = input("Update distance from star (enter for 0): ")
             if distance is not '':
                 modified = True
