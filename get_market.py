@@ -64,6 +64,29 @@ comm_correct = {
 # Some lookup tables.
 #----------------------------------------------------------------
 
+# This translates what the API calls a ship into what TD calls a
+# ship.
+
+ship_names = {
+    'Adder': 'Adder',
+    'Anaconda': 'Anaconda',
+    'Asp': 'Asp Explorer',
+    'CobraMkIII': 'Cobra',
+    'Eagle': 'Eagle',
+    'Empire_Fighter': 'Empire_Fighter',
+    'Empire_Trader': 'Imperial Clipper',
+    'Federation_Dropship': 'Dropship',
+    'Federation_Fighter': 'Federation_Fighter',
+    'Hauler': 'Hauler',
+    'Orca': 'Orca',
+    'Python': 'Python',
+    'SideWinder': 'Sidewinder',
+    'Type6': 'Lakon Type 6',
+    'Type7': 'Lakon Type 7',
+    'Type9': 'Lakon Type 9',
+    'Viper': 'Viper',
+}
+
 rank_names = {
     'combat': (
         'Harmless',
@@ -263,6 +286,36 @@ def read_stations():
     return fieldnames, result
 
 
+def read_ship_vendors():
+    '''
+    Read the ShipVendor CSV.
+    Returns a list of lists for feeding into the CSV writer later.
+    '''
+
+    # Be OS friendly
+    csvFileName = os.path.abspath(args.tdpath+'/data/ShipVendor.csv')
+
+    # Open the current csv
+    reader = csv.reader(
+        open(csvFileName, 'r'),
+        delimiter=',',
+        quotechar="'",
+        doublequote=True
+    )
+
+    # Pull in the field names, in case they change again
+    fieldnames = next(reader)
+
+    # Pull in all the rows, casting them to proper types
+    result = [[
+        str(x[0]),
+        str(x[1]),
+        str(x[2])
+    ] for x in reader]
+
+    return fieldnames, result
+
+
 def write_stations(fieldnames, stations):
     '''
     Write out the stations CSV file given a list of stations.
@@ -298,6 +351,44 @@ def write_stations(fieldnames, stations):
 
     # Write out the sorted station list
     writer.writerows(stations)
+
+
+def write_ship_vendors(fieldnames, vendors):
+    '''
+    Write out the ShipVendors CSV file given a list.
+    '''
+
+    # Be OS friendly
+    csvFileName = os.path.abspath(args.tdpath+'/data/ShipVendor.csv')
+
+    # Sort the list
+    vendors.sort(
+        key=lambda k: (
+            k[0].lower(),
+            k[1].lower(),
+            k[2].lower()
+        )
+    )
+
+    # Open /data/ShipVendor.csv for write
+    fh = open(csvFileName, 'w')
+
+    # csv writer
+    writer = csv.writer(
+        fh,
+        delimiter=',',
+        quotechar="'",
+        doublequote=True,
+        quoting=csv.QUOTE_NONNUMERIC,
+        lineterminator="\n"
+    )
+
+    # Manually write the field names. The stupid csv module wants to quote
+    # these, but TD doesn't want that.
+    fh.write(fieldnames[0]+','+fieldnames[1]+','+fieldnames[2]+'\n')
+
+    # Write out the sorted ship list
+    writer.writerows(vendors)
 
 
 def add_station(system, station, distance=0, blackmarket='?', max_pad_size='?',
@@ -345,6 +436,36 @@ def add_station(system, station, distance=0, blackmarket='?', max_pad_size='?',
 
     # Write out the file.
     write_stations(fieldnames, stations)
+
+
+def add_ship_vendor(system, station, ships, fieldnames=None, vendors=None
+    ):
+    '''
+    Add a list of ships to ShipVenddor.csv, and sort it.
+    '''
+
+    # Check to see if we were given the data. If not,
+    # go read it.
+    if fieldnames is None or vendors is None:
+        (fieldnames, vendors) = read_ship_vendors()
+
+    # for each ship, make sure it's in the list.
+    for ship in ships:
+        # Translate the name.
+        ship = ship_names[ship]
+
+        # check the list
+        if [system, station, ship] not in vendors:
+            vendors.append(
+                [
+                    str(system),
+                    str(station),
+                    str(ship),
+                ]
+            )
+
+    # Write out the file.
+    write_ship_vendors(fieldnames, vendors)
 
 
 def update_station(system, station, distance=None, blackmarket=None, max_pad_size=None,
@@ -782,6 +903,17 @@ def Main():
                            blackmarket=blackmarket,
                            max_pad_size=max_pad_size)
             print('Station updated.')
+
+    # If a shipyard exists, update the ship vendor csv
+    if 'ships' in api.profile['lastStarport']:
+        if args.yes is False:
+            print('Shipyard found. Add this to ShipVendor.csv?')
+            r = input("Type YES: ")
+        if r is 'YES' or args.yes is True:
+            print('Updating shipyard vendor...')
+            ships = api.profile['lastStarport']['ships']['shipyard_list']
+            #ships.append(api.profile['lastStarport']['ships']['unavailable_list'])
+            add_ship_vendor(system, station, ships)
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
