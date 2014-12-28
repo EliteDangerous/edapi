@@ -201,9 +201,9 @@ def parse_args():
 
     # Base file name. 
     parser.add_argument("--basename",
-                        default="get_market",
+                        default="edms",
                         help='Base file name. This is used to construct the\
-                        cookie and vars file names. Defaults to "get_market"')
+                        cookie and vars file names. Defaults to "edms"')
 
     # tdpath
     parser.add_argument("--tdpath",
@@ -568,7 +568,7 @@ class EDAPI:
 
     _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'
     _baseurl = 'https://companion.orerve.net/'
-    _basename = 'get_market'
+    _basename = 'edms'
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
