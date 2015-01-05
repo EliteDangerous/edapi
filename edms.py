@@ -276,7 +276,7 @@ def read_stations():
 
     # Pull in all the rows, casing them to proper types
     result = [[
-        str(x[0]),
+        str(x[0]).upper(),
         str(x[1]),
         int(round(float(x[2]))),
         str(x[3]),
@@ -308,7 +308,7 @@ def read_ship_vendors():
 
     # Pull in all the rows, casting them to proper types
     result = [[
-        str(x[0]),
+        str(x[0]).upper(),
         str(x[1]),
         str(x[2])
     ] for x in reader]
@@ -426,7 +426,7 @@ def add_station(system, station, distance=0, blackmarket='?', max_pad_size='?',
     # Append the new station
     stations.append(
         [
-            str(system),
+            str(system).upper(),
             str(station),
             distance,
             blackmarket,
@@ -448,6 +448,9 @@ def add_ship_vendor(system, station, ships, fieldnames=None, vendors=None
     # go read it.
     if fieldnames is None or vendors is None:
         (fieldnames, vendors) = read_ship_vendors()
+
+    # TD keeps systems in upper case. No idea why.
+    system = system.upper()
 
     # for each ship, make sure it's in the list.
     for ship in ships:
@@ -860,7 +863,7 @@ def Main():
     blackmarket = '?'
     max_pad_size = '?'
     for row in myfile:
-        if (row['system'].lower() == system.lower() and
+        if (row['system'].upper() == system.upper() and
             row['station'].lower() == station.lower()):
             found = True
             distance = row['distance']
