@@ -76,7 +76,7 @@ ship_names = {
     'CobraMkIII': 'Cobra',
     'Eagle': 'Eagle',
     'Empire_Fighter': 'Empire_Fighter',
-    'Empire_Trader': 'Imperial Clipper',
+    'Empire_Trader': 'Clipper',
     'Federation_Dropship': 'Dropship',
     'Federation_Fighter': 'Federation_Fighter',
     'Hauler': 'Hauler',
