@@ -585,7 +585,7 @@ def Main():
     # import.
     sys.path.insert(0, args.tdpath)
 
-    # Connect tot the API and grab all the info!
+    # Connect to the API and grab all the info!
     api = EDAPI()
 
     # Colors
