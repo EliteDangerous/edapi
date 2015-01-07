@@ -254,38 +254,6 @@ def parse_args():
     return args
 
 
-def read_stations():
-    '''
-    Read the stations CSV.
-    Returns a list of lists for feeding into the CSV writer later.
-    '''
-
-    # Be OS friendly
-    csvFileName = os.path.abspath(args.tdpath+'/data/Station.csv')
-
-    # Open the current csv
-    reader = csv.reader(
-        open(csvFileName, 'r'),
-        delimiter=',',
-        quotechar="'",
-        doublequote=True
-    )
-
-    # Pull in the field names, in case they change again
-    fieldnames = next(reader)
-
-    # Pull in all the rows, casing them to proper types
-    result = [[
-        str(x[0]).upper(),
-        str(x[1]),
-        int(round(float(x[2]))),
-        str(x[3]),
-        str(x[4])
-    ] for x in reader]
-
-    return fieldnames, result
-
-
 def read_ship_vendors():
     '''
     Read the ShipVendor CSV.
@@ -314,43 +282,6 @@ def read_ship_vendors():
     ] for x in reader]
 
     return fieldnames, result
-
-
-def write_stations(fieldnames, stations):
-    '''
-    Write out the stations CSV file given a list of stations.
-    '''
-
-    # Be OS friendly
-    csvFileName = os.path.abspath(args.tdpath+'/data/Station.csv')
-
-    # Sort the list
-    stations.sort(
-        key=lambda k: (
-            k[0].lower(),
-            k[1].lower()
-        )
-    )
-
-    # Open Station.csv for write
-    fh = open(csvFileName, 'w')
-
-    # csv writer
-    writer = csv.writer(
-        fh,
-        delimiter=',',
-        quotechar="'",
-        doublequote=True,
-        quoting=csv.QUOTE_NONNUMERIC,
-        lineterminator="\n"
-    )
-
-    # Manually write the field names. The stupid csv module wants to quote
-    # these, but TD doesn't want that.
-    fh.write(fieldnames[0]+','+fieldnames[1]+','+fieldnames[2]+','+fieldnames[3]+','+fieldnames[4]+'\n')
-
-    # Write out the sorted station list
-    writer.writerows(stations)
 
 
 def write_ship_vendors(fieldnames, vendors):
@@ -391,53 +322,6 @@ def write_ship_vendors(fieldnames, vendors):
     writer.writerows(vendors)
 
 
-def add_station(system, station, distance=0, blackmarket='?', max_pad_size='?',
-        fieldnames=None,
-        stations=None
-    ):
-    '''
-    Add a station to data/Station.csv, and sort it.
-    This is a real PITA because the Python csv module sucks, and TD basically
-    does its own thing.
-    '''
-
-    # Check to see if we were given the data. If not,
-    # go read it.
-    if fieldnames is None or stations is None:
-        (fieldnames, stations) = read_stations()
-
-    # Sanity check the station data.
-    try:
-        distance = int(distance)
-    except:
-        try:
-            distance = float(distance)
-        except:
-            distance = 0
-
-    blackmarket = blackmarket.upper()
-    if blackmarket not in ('?', 'Y', 'N'):
-        blackmarket = '?'
-
-    max_pad_size = max_pad_size.upper()
-    if max_pad_size not in ('?', 'S', 'M', 'L'):
-        max_pad_size = '?'
-
-    # Append the new station
-    stations.append(
-        [
-            str(system).upper(),
-            str(station),
-            distance,
-            blackmarket,
-            max_pad_size,
-        ]
-    )
-
-    # Write out the file.
-    write_stations(fieldnames, stations)
-
-
 def add_ship_vendor(system, station, ships, fieldnames=None, vendors=None
     ):
     '''
@@ -470,44 +354,6 @@ def add_ship_vendor(system, station, ships, fieldnames=None, vendors=None
     # Write out the file.
     write_ship_vendors(fieldnames, vendors)
 
-
-def update_station(system, station, distance=None, blackmarket=None, max_pad_size=None,
-        fieldnames=None,
-        stations=None
-    ):
-    '''
-    Update a station with new info
-    '''
-
-    # Check to see if we were given the data. If not,
-    # go read it.
-    if fieldnames is None or stations is None:
-        (fieldnames, stations) = read_stations()
-
-    for i, item in enumerate(stations):
-        # Look for the station we are interested in
-        if (system.lower() == item[0].lower() and
-            station.lower() == item[1].lower()):
-            # Update the distance
-            if distance is not None:
-                stations[i][2] = int(distance)
-
-            # Update the black market.
-            if blackmarket is not None:
-                blackmarket = blackmarket.upper()
-                if blackmarket not in ('?', 'Y', 'N'):
-                    blackmarket = '?'
-                stations[i][3] = blackmarket
-
-            # Update the max pad size.
-            if max_pad_size is not None:
-                max_pad_size = max_pad_size.upper()
-                if max_pad_size not in ('?', 'S', 'M', 'L'):
-                    max_pad_size = '?'
-                stations[i][4] = max_pad_size
-
-    # Write out the file.
-    write_stations(fieldnames, stations)
 
 def convertSecs(seconds):
     '''
@@ -848,64 +694,77 @@ def Main():
                 )
             )
 
+    # Setup TD
+    print ('Initializing TradeDangerous...')
+    import tradeenv
+    tdenv = tradeenv.TradeEnv()
+    if args.tdpath is not '.':
+        tdenv.dataDir = args.tdpath+'/data'
+    import tradedb
+    tdb = tradedb.TradeDB(tdenv)
+    import cache
+    import csvexport
+
     # Check to see if this system is in the Stations file
-    myfile = csv.DictReader(open(os.path.abspath(args.tdpath+'/data/Station.csv')),
-                            quotechar="'",
-                            fieldnames=('system',
-                                        'station',
-                                        'distance',
-                                        'blackmarket',
-                                        'max_pad_size',
-                                       )
-                           )
-    found = False
-    distance = 0
-    blackmarket = '?'
-    max_pad_size = '?'
-    for row in myfile:
-        if (row['system'].upper() == system.upper() and
-            row['station'].lower() == station.lower()):
-            found = True
-            distance = row['distance']
-            blackmarket = row['blackmarket']
-            max_pad_size = row['max_pad_size']
-            break
+    try:
+        station_lookup = tdb.lookupStation(station, system)
+    except:
+        station_lookup = None
 
     # The station isn't in the stations file. Prompt to add it.
-    if not found:
-        print(c.WARNING+'WARNING! Station not in station file.'+c.ENDC)
+    if not station_lookup:
+        print(c.WARNING+'WARNING! Station unknown.'+c.ENDC)
         if args.yes is False:
-            print('Add this station to Station.csv? (Be SURE this is correct!)')
+            print('Add this station to the TD database and Station.csv?')
             r = input("Type YES: ")
             if r != 'YES' and args.yes is False:
                 print(c.FAIL+'Aborting!'+c.ENDC)
                 sys.exit(1)
         print('Adding station...')
-        distance = input("Distance from star (enter for 0): ")
-        blackmarket = input("Black market present (Y, N or enter for ?): ")
-        max_pad_size = input("Max pad size (S, M, L or enter for ?): ")
-        add_station(system, station, distance, blackmarket, max_pad_size)
+        lsFromStar = int(input("Distance from star (enter for 0): ")) or 0
+        blackMarket = input("Black market present (Y, N or enter for ?): ") or '?'
+        maxPadSize = input("Max pad size (S, M, L or enter for ?): ") or '?'
+        system_lookup = tdb.lookupSystem(system)
+        if tdb.addLocalStation(
+            system = system_lookup,
+            name = station,
+            lsFromStar = lsFromStar,
+            blackMarket = blackMarket,
+            maxPadSize = maxPadSize,
+        ):
+            lines, csvPath = csvexport.exportTableToFile(
+                tdb,
+                tdenv,
+                "Station"
+            )
+            tdenv.NOTE("{} updated.", csvPath)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
-        modified = False
-        if float(distance) == 0:
-            distance = input("Update distance from star (enter for 0): ")
-            if distance is not '':
-                modified = True
-        if blackmarket is '?':
-            blackmarket = input("Update black market present (Y, N or enter for ?): ")
-            if blackmarket is not '':
-                modified = True
-        if max_pad_size is '?':
-            max_pad_size = input("Update max pad size (S, M, L or enter for ?): ")
-            if max_pad_size is not '':
-                modified = True
-        if modified is True:
-            update_station(system, station,
-                           distance=distance,
-                           blackmarket=blackmarket,
-                           max_pad_size=max_pad_size)
-            print('Station updated.')
+        lsFromStar = station_lookup.lsFromStar
+        blackMarket = station_lookup.blackMarket
+        maxPadSize = station_lookup.maxPadSize
+
+        if lsFromStar == 0:
+            lsFromStar = int(input("Update distance from star (enter for 0): ")) or 0
+        if blackMarket is '?':
+            blackMarket = input("Update black market present (Y, N or enter for ?): ") or '?'
+        if maxPadSize is '?':
+            maxPadSize = input("Update max pad size (S, M, L or enter for ?): ") or '?'
+        if (lsFromStar != station_lookup.lsFromStar or
+            blackMarket != station_lookup.blackMarket or
+            maxPadSize != station_lookup.maxPadSize):
+            if tdb.updateLocalStation(
+                station = station_lookup,
+                lsFromStar = lsFromStar,
+                blackMarket = blackMarket,
+                maxPadSize = maxPadSize,
+            ):
+                lines, csvPath = csvexport.exportTableToFile(
+                    tdb,
+                    tdenv,
+                    "Station"
+                )
+                tdenv.NOTE("{} updated.", csvPath)
 
     # If a shipyard exists, update the ship vendor csv
     if 'ships' in api.profile['lastStarport']:
@@ -932,16 +791,6 @@ def Main():
         if r != 'YES':
             print(c.FAIL+'Aborting!'+c.ENDC)
             sys.exit(1)
-
-    # Setup TD
-    print ('Initializing TradeDangerous...')
-    import tradeenv
-    tdenv = tradeenv.TradeEnv()
-    if args.tdpath is not '.':
-        tdenv.dataDir = args.tdpath+'/data'
-    import tradedb
-    tdb = tradedb.TradeDB(tdenv)
-    import cache
 
     # Grab the old prices so we can print a comparison.
     conn = sqlite3.connect(os.path.abspath(args.tdpath+'/data/TradeDangerous.db'))
