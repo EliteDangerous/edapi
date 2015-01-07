@@ -141,7 +141,7 @@ rank_names = {
         'Recruit',
         'Cadet',
         'Midshipman',
-        'Pettey Officer',
+        'Petty Officer',
         'Chief Petty Officer',
         'Warrant Officer',
         'Ensign',
