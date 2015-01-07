@@ -13,7 +13,7 @@ Either place edms.py in the TradeDangerous root, or tell it where to
 find TradeDangerous with the --tdpath option.
 
 usage: edms.py [-h] [--version] [--debug] [--vars] [--basename BASENAME]
-               [--tdpath TDPATH] [--no-color] [-y] [--keys [KEYS [KEYS ...]]]
+               [--tdpath TDPATH] [--no-color] [--keys [KEYS [KEYS ...]]]
                [--tree]
 
 EDMS: Elite Dangerous Market Scraper
@@ -31,8 +31,6 @@ optional arguments:
                         locate the TradeDangerous python modules and data/
                         directory. Defaults to the cwd.
   --no-color            Disable the use of ansi colors in output.
-  -y, --yes             Always accept new station names and import latest data
-                        without prompting.
   --keys [KEYS [KEYS ...]]
                         Instead of normal import, display raw API data given a
                         set of dictionary keys.

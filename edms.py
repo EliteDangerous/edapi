@@ -219,14 +219,6 @@ def parse_args():
                         default=True,
                         help="Disable the use of ansi colors in output.")
 
-    # Always add stations and import.
-    parser.add_argument("-y", "--yes",
-                        dest="yes",
-                        action="store_true",
-                        default=False,
-                        help="Always accept new station names and import\
-                        latest data without prompting.")
-
     # keys
     parser.add_argument("--keys",
                         action="append",
@@ -711,15 +703,9 @@ def Main():
     except:
         station_lookup = None
 
-    # The station isn't in the stations file. Prompt to add it.
+    # The station isn't in the stations file. Add it.
     if not station_lookup:
         print(c.WARNING+'WARNING! Station unknown.'+c.ENDC)
-        if args.yes is False:
-            print('Add this station to the TD database and Station.csv?')
-            r = input("Type YES: ")
-            if r != 'YES' and args.yes is False:
-                print(c.FAIL+'Aborting!'+c.ENDC)
-                sys.exit(1)
         print('Adding station...')
         lsFromStar = int(input("Distance from star (enter for 0): ")) or 0
         blackMarket = input("Black market present (Y, N or enter for ?): ") or '?'
@@ -740,6 +726,8 @@ def Main():
             tdenv.NOTE("{} updated.", csvPath)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
+
+        # See if we need to update the info for this station.
         lsFromStar = station_lookup.lsFromStar
         blackMarket = station_lookup.blackMarket
         maxPadSize = station_lookup.maxPadSize
@@ -768,14 +756,9 @@ def Main():
 
     # If a shipyard exists, update the ship vendor csv
     if 'ships' in api.profile['lastStarport']:
-        if args.yes is False:
-            print('Shipyard found. Add this to ShipVendor.csv?')
-            r = input("Type YES: ")
-        if r is 'YES' or args.yes is True:
-            print('Updating shipyard vendor...')
-            ships = api.profile['lastStarport']['ships']['shipyard_list']
-            #ships.append(api.profile['lastStarport']['ships']['unavailable_list'])
-            add_ship_vendor(system, station, ships)
+        print('Updating shipyard vendor...')
+        ships = api.profile['lastStarport']['ships']['shipyard_list']
+        add_ship_vendor(system, station, ships)
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
@@ -784,14 +767,7 @@ def Main():
         pprint(api.profile['lastStarport'].keys())
         sys.exit(1)
 
-    # Station exists. Prompt for import.
-    if args.yes is False:
-        print('Import station market with the current time stamp?')
-        r = input("Type YES: ")
-        if r != 'YES':
-            print(c.FAIL+'Aborting!'+c.ENDC)
-            sys.exit(1)
-
+    # Station exists. Import.
     # Grab the old prices so we can print a comparison.
     conn = sqlite3.connect(os.path.abspath(args.tdpath+'/data/TradeDangerous.db'))
     conn.execute("PRAGMA foreign_keys=ON")
