@@ -64,6 +64,8 @@ comm_correct = {
 # Some lookup tables.
 #----------------------------------------------------------------
 
+bracket_levels = ('-', 'L', 'M', 'H')
+
 # This translates what the API calls a ship into what TD calls a
 # ship.
 
@@ -829,12 +831,19 @@ def Main():
         )
 
         # If stock is zero, list it as unavailable.
-        # Otherwise record stock at an unknown demand.
-        # TODO: figure out how to calculate demand.
         if commodity['stock'] == 0:
             commodity['stock'] = '-'
         else:
-            commodity['stock'] = str(int(commodity['stock']))+'?'
+            demand = bracket_levels[int(commodity['stockBracket'])]
+            commodity['stock'] = str(int(commodity['stock']))+demand
+
+        # If demand is zero, list it as unknown. This is required, or TD will
+        # zero out the sell price.
+        if commodity['demandBracket'] == 0:
+            commodity['demand'] = '?'
+        else:
+            demand = bracket_levels[int(commodity['demandBracket'])]
+            commodity['demand'] = str(int(commodity['demand']))+demand
 
         # Print price differences
         oldCom = oldPrices.get(commodity['name'], (0,0))
@@ -876,10 +885,11 @@ def Main():
             )
 
         f.write(
-            "\t\t{} {} {} ? {}\n".format(
+            "\t\t{} {} {} {} {}\n".format(
                 commodity['name'],
                 commodity['sellPrice'],
                 commodity['buyPrice'],
+                commodity['demand'],
                 commodity['stock'],
             ).encode('UTF-8')
         )

@@ -1,9 +1,9 @@
 ==============================================================================
 EDMS: Elite Dangerous Market Scraper
-Requires Python 3.4.
+Requires Python 3.4 and TradeDangerous.
 ==============================================================================
-Automates pulling your current station info and market data and
-importing into TradeDangerous.
+Automates pulling your profile information from the mobile API, and populating
+TradeDangerous with station, market, and shipyard data.
 
 ==============================================================================
 == Usage:
@@ -35,4 +35,4 @@ optional arguments:
                         Instead of normal import, display raw API data given a
                         set of dictionary keys.
   --tree                Used with --keys. If present will print all content
-                        below the specificed key.
+                        below the specified key.
