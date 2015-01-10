@@ -711,7 +711,8 @@ def Main():
     if not station_lookup:
         print(c.WARNING+'WARNING! Station unknown.'+c.ENDC)
         print('Adding station...')
-        lsFromStar = int(input("Distance from star (enter for 0): ")) or 0
+        lsFromStar = input("Distance from star (enter for 0): ") or 0
+        lsFromStar = int(lsFromStar)
         blackMarket = input("Black market present (Y, N or enter for ?): ") or '?'
         maxPadSize = input("Max pad size (S, M, L or enter for ?): ") or '?'
         system_lookup = tdb.lookupSystem(system)
@@ -737,7 +738,8 @@ def Main():
         maxPadSize = station_lookup.maxPadSize
 
         if lsFromStar == 0:
-            lsFromStar = int(input("Update distance from star (enter for 0): ")) or 0
+            lsFromStar = input("Update distance from star (enter for 0): ") or 0
+            lsFromStar = int(lsFromStar)
         if blackMarket is '?':
             blackMarket = input("Update black market present (Y, N or enter for ?): ") or '?'
         if maxPadSize is '?':
