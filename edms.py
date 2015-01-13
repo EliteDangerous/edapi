@@ -762,7 +762,7 @@ def Main():
 
     # If a shipyard exists, update the ship vendor csv
     if 'ships' in api.profile['lastStarport']:
-        print('Updating shipyard vendor...')
+        print(c.OKBLUE+'Updating shipyard vendor...'+c.ENDC)
         ships = api.profile['lastStarport']['ships']['shipyard_list']
         add_ship_vendor(system, station, ships)
 
