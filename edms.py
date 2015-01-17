@@ -72,7 +72,7 @@ bracket_levels = ('-', 'L', 'M', 'H')
 ship_names = {
     'Adder': 'Adder',
     'Anaconda': 'Anaconda',
-    'Asp': 'Asp Explorer',
+    'Asp': 'Asp',
     'CobraMkIII': 'Cobra',
     'Eagle': 'Eagle',
     'Empire_Fighter': 'Empire_Fighter',
@@ -83,9 +83,9 @@ ship_names = {
     'Orca': 'Orca',
     'Python': 'Python',
     'SideWinder': 'Sidewinder',
-    'Type6': 'Lakon Type 6',
-    'Type7': 'Lakon Type 7',
-    'Type9': 'Lakon Type 9',
+    'Type6': 'Type 6',
+    'Type7': 'Type 7',
+    'Type9': 'Type 9',
     'Viper': 'Viper',
 }
 
