@@ -41,7 +41,8 @@ optional arguments:
 == TradeDangerous plugin usage:
 ==============================================================================
 
-Copy edapi_plug.py to the plugins directory in TradeDangerous. Use the
-import command to connect to the API and import price and shipyard data.
+Copy api_plug.py to the plugins directory in TradeDangerous. Use the
+import command to connect to the API and import price and shipyard
+data.
 
-./trade.py import --plug edapi
+./trade.py import --plug api
