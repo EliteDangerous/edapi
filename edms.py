@@ -487,6 +487,45 @@ def Main():
     # Connect to the API and grab all the info!
     api = EDAPI()
 
+    # User specified the --keys option. Use this to display some subzet of the
+    # API response and exit.
+    if args.keys is not None:
+        # A little legend.
+        for key in args.keys[0]:
+            print(key, end="->")
+        print()
+
+        # Start a thr root
+        ref = api.profile
+        # Try to walk the tree
+        for key in args.keys[0]:
+            try:
+                ref = ref[key]
+            except:
+                print("key:", key)
+                print("not found. Contents at previous key:")
+                try:
+                    pprint(sorted(ref.keys()))
+                except:
+                    pprint(ref)
+                sys.exit(1)
+        # Print whatever we found here.
+        try:
+            if args.tree:
+                pprint(ref)
+            else:
+                pprint(sorted(ref.keys()))
+        except:
+            pprint(ref)
+        # Exit without doing anything else.
+        sys.exit()
+
+    # Sanity check that we are docked
+    if not api.profile['commander']['docked']:
+        print(c.WARNING+'Commander not docked.'+c.ENDC)
+        print(c.FAIL+'Aborting!'+c.ENDC)
+        sys.exit(1)
+
     # Colors
     c = ansiColors()
 
@@ -526,45 +565,6 @@ def Main():
         )
     print("+------------+------------------+---+---------------+---------------------+")
     print('Docked:', api.profile['commander']['docked'])
-
-    # User specified the --keys option. Use this to display some subzet of the
-    # API response and exit.
-    if args.keys is not None:
-        # A little legend.
-        for key in args.keys[0]:
-            print(key, end="->")
-        print()
-
-        # Start a thr root
-        ref = api.profile
-        # Try to walk the tree
-        for key in args.keys[0]:
-            try:
-                ref = ref[key]
-            except:
-                print("key:", key)
-                print("not found. Contents at previous key:")
-                try:
-                    pprint(sorted(ref.keys()))
-                except:
-                    pprint(ref)
-                sys.exit(1)
-        # Print whatever we found here.
-        try:
-            if args.tree:
-                pprint(ref)
-            else:
-                pprint(sorted(ref.keys()))
-        except:
-            pprint(ref)
-        # Exit without doing anything else.
-        sys.exit()
-
-    # Sanity check that we are docked
-    if not api.profile['commander']['docked']:
-        print(c.WARNING+'Commander not docked.'+c.ENDC)
-        print(c.FAIL+'Aborting!'+c.ENDC)
-        sys.exit(1)
 
     system = api.profile['lastSystem']['name']
     station = api.profile['lastStarport']['name']
