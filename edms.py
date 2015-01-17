@@ -763,8 +763,25 @@ def Main():
     # If a shipyard exists, update the ship vendor csv
     if 'ships' in api.profile['lastStarport']:
         print(c.OKBLUE+'Updating shipyard vendor...'+c.ENDC)
-        ships = api.profile['lastStarport']['ships']['shipyard_list']
-        add_ship_vendor(system, station, ships)
+        ships = api.profile['lastStarport']['ships']['shipyard_list'].keys()
+        db = tdb.getDB()
+        for ship in ships:
+            ship_lookup = tdb.lookupShip(ship_names[ship])
+            db.execute("""
+                       REPLACE INTO ShipVendor
+                       (ship_id, station_id)
+                       VALUES
+                       (?, ?)
+                       """,
+                       [ship_lookup.ID, station_lookup.ID])
+            db.commit()
+        tdenv.NOTE("Updated {} ships in {} shipyard.", len(ships), station)
+        lines, csvPath = csvexport.exportTableToFile(
+            tdb,
+            tdenv,
+            "ShipVendor",
+        )
+        tdenv.NOTE("{} updated.", csvPath)
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
@@ -775,11 +792,8 @@ def Main():
 
     # Station exists. Import.
     # Grab the old prices so we can print a comparison.
-    conn = sqlite3.connect(os.path.abspath(args.tdpath+'/data/TradeDangerous.db'))
-    conn.execute("PRAGMA foreign_keys=ON")
-    cur  = conn.cursor()
-
-    oldPrices = {n: (s, b) for (n, s, b) in cur.execute(
+    db = tdb.getDB()
+    oldPrices = {n: (s, b) for (n, s, b) in db.execute(
         """
         SELECT
             Item.name,
