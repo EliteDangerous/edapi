@@ -6,7 +6,7 @@ Automates pulling your profile information from the mobile API, and populating
 TradeDangerous with station, market, and shipyard data.
 
 ==============================================================================
-== Usage:
+== Command line usage:
 ==============================================================================
 
 Either place edms.py in the TradeDangerous root, or tell it where to
@@ -36,3 +36,12 @@ optional arguments:
                         set of dictionary keys.
   --tree                Used with --keys. If present will print all content
                         below the specified key.
+
+==============================================================================
+== TradeDangerous plugin usage:
+==============================================================================
+
+Copy edapi_plug.py to the plugins directory in TradeDangerous. Use the
+import command to connect to the API and import price and shipyard data.
+
+./trade.py import --plug edapi
