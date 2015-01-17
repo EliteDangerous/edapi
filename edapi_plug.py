@@ -325,7 +325,9 @@ class ImportPlugin(plugins.ImportPluginBase):
 
         # If a shipyard exists, update the ship vendor list.
         if 'ships' in api.profile['lastStarport']:
-            ships = api.profile['lastStarport']['ships']['shipyard_list'].keys()
+            ships = list(api.profile['lastStarport']['ships']['shipyard_list'].keys())
+            for ship in api.profile['lastStarport']['ships']['unavailable_list']:
+                ships.append(ship['name'])
             db = tdb.getDB()
             for ship in ships:
                 ship_lookup = tdb.lookupShip(ship_names[ship])
