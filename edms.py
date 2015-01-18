@@ -754,10 +754,10 @@ def Main():
             demand = bracket_levels[int(commodity['stockBracket'])]
             commodity['stock'] = str(int(commodity['stock']))+demand
 
-        # If demand is zero, list it as unknown. This is required, or TD will
-        # zero out the sell price.
-        if commodity['demandBracket'] == 0:
+        # If demand is zero, zero the sell price.
+        if commodity['demand'] == 0:
             commodity['demand'] = '?'
+            commodity['sellPrice'] = 0
         else:
             demand = bracket_levels[int(commodity['demandBracket'])]
             commodity['demand'] = str(int(commodity['demand']))+demand
