@@ -1,7 +1,7 @@
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Import plugin that downloads market and ship vendor data from the
 # Elite Dangerous mobile API.
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 
 import cache
 import csvexport
@@ -11,17 +11,14 @@ import http.cookiejar
 import json
 import pathlib
 import plugins
+import sys
 import textwrap
-import tradedb
-import tradeenv
 import urllib.parse
 import urllib.request as urllib2
 
-from plugins import PluginException
-
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Deal with some differences in names between TD, ED and the API.
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 
 bracket_levels = ('-', 'L', 'M', 'H')
 
@@ -50,26 +47,26 @@ ship_names = {
 
 # Categories to ignore. Drones end up here. No idea what they are.
 cat_ignore = [
-        'NonMarketable',
+    'NonMarketable',
 ]
 
 # TD has different names for these.
 cat_correct = {
-        'Narcotics': 'Legal Drugs'
+    'Narcotics': 'Legal Drugs'
 }
 
 # TD has different names for these.
 comm_correct = {
-        'Agricultural Medicines': 'Agri-Medicines',
-        'Atmospheric Extractors': 'Atmospheric Processors',
-        'Auto Fabricators': 'Auto-Fabricators',
-        'Basic Narcotics': 'Narcotics',
-        'Bio Reducing Lichen': 'Bioreducing Lichen',
-        'Hazardous Environment Suits': 'H.E. Suits',
-        'Heliostatic Furnaces': 'Microbial Furnaces',
-        'Marine Supplies': 'Marine Equipment',
-        'Non Lethal Weapons': 'Non-Lethal Weapons',
-        'Terrain Enrichment Systems': 'Land Enrichment Systems',
+    'Agricultural Medicines': 'Agri-Medicines',
+    'Atmospheric Extractors': 'Atmospheric Processors',
+    'Auto Fabricators': 'Auto-Fabricators',
+    'Basic Narcotics': 'Narcotics',
+    'Bio Reducing Lichen': 'Bioreducing Lichen',
+    'Hazardous Environment Suits': 'H.E. Suits',
+    'Heliostatic Furnaces': 'Microbial Furnaces',
+    'Marine Supplies': 'Marine Equipment',
+    'Non Lethal Weapons': 'Non-Lethal Weapons',
+    'Terrain Enrichment Systems': 'Land Enrichment Systems',
 }
 
 
@@ -78,7 +75,7 @@ class EDAPI:
     A class that handles the Frontier ED API.
     '''
 
-    _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'
+    _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'  # NOQA
     _baseurl = 'https://companion.orerve.net/'
 
     def __init__(self, cookiefile):
@@ -116,7 +113,6 @@ class EDAPI:
         except:
             sys.exit('Unable to parse JSON response for /profile!')
 
-
     def _getBasicURI(self, uri, values=None):
         '''
         Perform a GET/POST to a URI with POST encoding and cookie handling.
@@ -141,7 +137,6 @@ class EDAPI:
         # Return the response object.
         return response
 
-
     def _getURI(self, uri, values=None):
         '''
         Perform a GET/POST and make sure the login
@@ -158,10 +153,12 @@ class EDAPI:
             response = self._getBasicURI(uri, values)
 
         if str(response.url).endswith('user/login'):
-            sys.exit("Something went terribly wrong. The login credentials appear correct, but we are being denied access.\n")
+            sys.exit(
+                "Something went terribly wrong. The login credentials appear"
+                "correct, but we are being denied access.\n"
+            )
 
         return response
-
 
     def _doLogin(self):
         '''
@@ -192,7 +189,10 @@ class EDAPI:
             it contains.
             """)))
 
-        print("\nIf you are not comfortable with this, DO NOT USE THIS PLUGIN.")
+        print(
+            "\nIf you are not comfortable with this, "
+            "DO NOT USE THIS PLUGIN."
+        )
         print()
 
         values = {}
@@ -208,7 +208,10 @@ class EDAPI:
         # Check to see if we need to do the auth token dance.
         if str(response.url).endswith('user/confirm'):
             print()
-            print("A verification code should have been sent to your email address.")
+            print(
+                "A verification code should have been sent to your"
+                "email address."
+            )
             print("Please provide that code (case sensitive!)")
             values = {}
             values['code'] = input("Code: ")
@@ -223,14 +226,12 @@ class ImportPlugin(plugins.ImportPluginBase):
 
     cookieFile = "edapi.cookies"
 
-
     def __init__(self, tdb, tdenv):
         super().__init__(tdb, tdenv)
 
         self.filename = self.defaultImportFile
         cookieFilePath = pathlib.Path(ImportPlugin.cookieFile)
         self.cookiePath = tdb.dataPath / cookieFilePath
-
 
     def run(self):
         tdb, tdenv = self.tdb, self.tdenv
@@ -256,7 +257,7 @@ class ImportPlugin(plugins.ImportPluginBase):
         tdb.close()
         tdb.reloadCache()
         tdb.load(
-                maxSystemLinkLy=tdenv.maxSystemLinkLy,
+            maxSystemLinkLy=tdenv.maxSystemLinkLy,
         )
         tdb.close()
 
@@ -272,17 +273,23 @@ class ImportPlugin(plugins.ImportPluginBase):
         if not station_lookup:
             print('Station unknown.')
             print('Adding:', place)
-            lsFromStar = input("Distance from star (enter for 0): ") or 0
+            lsFromStar = input(
+                "Distance from star (enter for 0): "
+            ) or 0
             lsFromStar = int(lsFromStar)
-            blackMarket = input("Black market present (Y, N or enter for ?): ") or '?'
-            maxPadSize = input("Max pad size (S, M, L or enter for ?): ") or '?'
+            blackMarket = input(
+                "Black market present (Y, N or enter for ?): "
+            ) or '?'
+            maxPadSize = input(
+                "Max pad size (S, M, L or enter for ?): "
+            ) or '?'
             system_lookup = tdb.lookupSystem(system)
             if tdb.addLocalStation(
-                system = system_lookup,
-                name = station,
-                lsFromStar = lsFromStar,
-                blackMarket = blackMarket,
-                maxPadSize = maxPadSize,
+                system=system_lookup,
+                name=station,
+                lsFromStar=lsFromStar,
+                blackMarket=blackMarket,
+                maxPadSize=maxPadSize,
             ):
                 lines, csvPath = csvexport.exportTableToFile(
                     tdb,
@@ -298,23 +305,31 @@ class ImportPlugin(plugins.ImportPluginBase):
             maxPadSize = station_lookup.maxPadSize
 
             if lsFromStar == 0:
-                lsFromStar = input("Update distance from star (enter for 0): ") or 0
+                lsFromStar = input(
+                    "Update distance from star (enter for 0): "
+                ) or 0
                 lsFromStar = int(lsFromStar)
 
             if blackMarket is '?':
-                blackMarket = input("Update black market present (Y, N or enter for ?): ") or '?'
+                blackMarket = input(
+                    "Update black market present (Y, N or enter for ?): "
+                ) or '?'
 
             if maxPadSize is '?':
-                maxPadSize = input("Update max pad size (S, M, L or enter for ?): ") or '?'
+                maxPadSize = input(
+                    "Update max pad size (S, M, L or enter for ?): "
+                ) or '?'
 
-            if (lsFromStar != station_lookup.lsFromStar or
+            if (
+                lsFromStar != station_lookup.lsFromStar or
                 blackMarket != station_lookup.blackMarket or
-                maxPadSize != station_lookup.maxPadSize):
+                maxPadSize != station_lookup.maxPadSize
+            ):
                 if tdb.updateLocalStation(
-                    station = station_lookup,
-                    lsFromStar = lsFromStar,
-                    blackMarket = blackMarket,
-                    maxPadSize = maxPadSize,
+                    station=station_lookup,
+                    lsFromStar=lsFromStar,
+                    blackMarket=blackMarket,
+                    maxPadSize=maxPadSize,
                 ):
                     lines, csvPath = csvexport.exportTableToFile(
                         tdb,
@@ -325,19 +340,23 @@ class ImportPlugin(plugins.ImportPluginBase):
 
         # If a shipyard exists, update the ship vendor list.
         if 'ships' in api.profile['lastStarport']:
-            ships = list(api.profile['lastStarport']['ships']['shipyard_list'].keys())
+            ships = list(
+                api.profile['lastStarport']['ships']['shipyard_list'].keys()
+            )
             for ship in api.profile['lastStarport']['ships']['unavailable_list']:
                 ships.append(ship['name'])
             db = tdb.getDB()
             for ship in ships:
                 ship_lookup = tdb.lookupShip(ship_names[ship])
-                db.execute("""
-                          REPLACE INTO ShipVendor
-                          (ship_id, station_id)
-                          VALUES
-                          (?, ?)
-                          """,
-                          [ship_lookup.ID, station_lookup.ID])
+                db.execute(
+                    """
+                    REPLACE INTO ShipVendor
+                    (ship_id, station_id)
+                    VALUES
+                    (?, ?)
+                    """,
+                    [ship_lookup.ID, station_lookup.ID]
+                )
                 db.commit()
             tdenv.NOTE("Updated {} ships in {} shipyard.", len(ships), place)
             lines, csvPath = csvexport.exportTableToFile(
@@ -348,8 +367,13 @@ class ImportPlugin(plugins.ImportPluginBase):
 
         # Some sanity checking on the market.
         if 'commodities' not in api.profile['lastStarport']:
-            print('The API did not return a commodity market for this station.')
-            print('If you think this is wrong, try again. The API will occasionally skip the market.')
+            print(
+                'The API did not return a commodity market for this station.'
+            )
+            print(
+                'If you think this is wrong, try again. The API will '
+                'occasionally skip the market.'
+            )
             return False
 
         # Create the import file.
@@ -363,7 +387,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                 if commodity['name'] in comm_correct:
                     commodity['name'] = comm_correct[commodity['name']]
 
-                f.write("\t+ {}\n".format( commodity['categoryname']))
+                f.write("\t+ {}\n".format(commodity['categoryname']))
 
                 # If stock is zero, list it as unavailable.
                 if commodity['stock'] == 0:
@@ -392,9 +416,9 @@ class ImportPlugin(plugins.ImportPluginBase):
         tdenv.ignoreUnknown = True
 
         cache.importDataFromFile(
-                tdb,
-                tdenv,
-                pathlib.Path(self.filename),
+            tdb,
+            tdenv,
+            pathlib.Path(self.filename),
         )
 
         # We did all the work

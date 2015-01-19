@@ -1,21 +1,17 @@
 #!/usr/bin/env python
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Elite: Dangerous Market Scraper
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 
 import argparse
-import csv
 from datetime import datetime
-from datetime import tzinfo
 import getpass
 import http.client
 import http.cookiejar
 import json
 import os
 from pathlib import Path
-import platform
 from pprint import pprint
-import sqlite3
 import sys
 import tempfile
 import traceback
@@ -25,18 +21,18 @@ import urllib.request as urllib2
 __version_info__ = ('2', '0', '0')
 __version__ = '.'.join(__version_info__)
 
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Deal with some differences in names between TD, ED and the API.
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 
 # Categories to ignore. Drones end up here. No idea what they are.
 cat_ignore = [
-        'NonMarketable',
+    'NonMarketable',
 ]
 
 # TD has different names for these.
 cat_correct = {
-        'Narcotics': 'Legal Drugs'
+    'Narcotics': 'Legal Drugs'
 }
 
 # Commodities to ignore. Don't try to pass these to TD. This is mostly for
@@ -48,21 +44,21 @@ comm_ignore = (
 
 # TD has different names for these.
 comm_correct = {
-        'Agricultural Medicines': 'Agri-Medicines',
-        'Atmospheric Extractors': 'Atmospheric Processors',
-        'Auto Fabricators': 'Auto-Fabricators',
-        'Basic Narcotics': 'Narcotics',
-        'Bio Reducing Lichen': 'Bioreducing Lichen',
-        'Hazardous Environment Suits': 'H.E. Suits',
-        'Heliostatic Furnaces': 'Microbial Furnaces',
-        'Marine Supplies': 'Marine Equipment',
-        'Non Lethal Weapons': 'Non-Lethal Weapons',
-        'Terrain Enrichment Systems': 'Land Enrichment Systems',
+    'Agricultural Medicines': 'Agri-Medicines',
+    'Atmospheric Extractors': 'Atmospheric Processors',
+    'Auto Fabricators': 'Auto-Fabricators',
+    'Basic Narcotics': 'Narcotics',
+    'Bio Reducing Lichen': 'Bioreducing Lichen',
+    'Hazardous Environment Suits': 'H.E. Suits',
+    'Heliostatic Furnaces': 'Microbial Furnaces',
+    'Marine Supplies': 'Marine Equipment',
+    'Non Lethal Weapons': 'Non-Lethal Weapons',
+    'Terrain Enrichment Systems': 'Land Enrichment Systems',
 }
 
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Some lookup tables.
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 
 bracket_levels = ('-', 'L', 'M', 'H')
 
@@ -173,16 +169,19 @@ rank_names = {
     ),
 }
 
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Functions.
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
+
 
 def parse_args():
     '''
     Parse arguments.
     '''
     # Basic argument parsing.
-    parser = argparse.ArgumentParser(description='EDMS: Elite Dangerous Market Scraper')
+    parser = argparse.ArgumentParser(
+        description='EDMS: Elite Dangerous Market Scraper'
+    )
 
     # Version
     parser.add_argument('--version',
@@ -203,7 +202,7 @@ def parse_args():
                         for current cargo capacity, credits, and current\
                         system/station.")
 
-    # Base file name. 
+    # Base file name.
     parser.add_argument("--basename",
                         default="edms",
                         help='Base file name. This is used to construct the\
@@ -255,7 +254,7 @@ def convertSecs(seconds):
     Convert a number of seconds to a string.
     '''
     if not isinstance(seconds, int):
-        return seconds 
+        return seconds
 
     hours = seconds // 3600
     seconds %= 3600
@@ -279,9 +278,9 @@ def convertSecs(seconds):
     return result
 
 
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Classes.
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 
 # Some fun shell colors.
 class ansiColors:
@@ -310,12 +309,11 @@ class EDAPI:
     A class that handles the Frontier ED API.
     '''
 
-    _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'
+    _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'  # NOQA
     _baseurl = 'https://companion.orerve.net/'
     _basename = 'edms'
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
-
 
     def __init__(self):
         '''
@@ -369,7 +367,6 @@ class EDAPI:
         if self.args.debug:
             pprint(self.profile)
 
-
     def _getBasicURI(self, uri, values=None):
         '''
         Perform a GET/POST to a URI with proper login and
@@ -414,7 +411,6 @@ class EDAPI:
         # Return the response object.
         return response
 
-
     def _getURI(self, uri, values=None):
         '''
         Perform a GET/POST and make sure the login
@@ -436,7 +432,6 @@ class EDAPI:
                      Try using --debug and report this.")
 
         return response
-
 
     def _doLogin(self):
         '''
@@ -465,16 +460,17 @@ class EDAPI:
         # Check to see if we need to do the auth token dance.
         if str(response.url).endswith('user/confirm'):
             print()
-            print("A verification code should have been sent to your email address.")
+            print("A verification code should have been sent to your "
+                  "email address.")
             print("Please provide that code (case sensitive!)")
             values = {}
             values['code'] = input("Code:")
             response = self._getBasicURI('user/confirm', values=values)
 
 
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Main.
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 
 def Main():
     '''
@@ -486,6 +482,9 @@ def Main():
 
     # Connect to the API and grab all the info!
     api = EDAPI()
+
+    # Colors
+    c = ansiColors()
 
     # User specified the --keys option. Use this to display some subzet of the
     # API response and exit.
@@ -526,18 +525,15 @@ def Main():
         print(c.FAIL+'Aborting!'+c.ENDC)
         sys.exit(1)
 
-    # Colors
-    c = ansiColors()
-
     # Print the commander profile
     print('Commander:', c.OKGREEN+api.profile['commander']['name']+c.ENDC)
-    print('Game Time: {:>12}'.format(convertSecs(api.profile['stats']['game_time'])))
+    print('Game Time: {:>12}'.format(convertSecs(api.profile['stats']['game_time'])))  # NOQA
     print('Credits  : {:>12,d}'.format(api.profile['commander']['credits']))
     print('Debt     : {:>12,d}'.format(api.profile['commander']['debt']))
-    print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))
-    print("+------------+------------------+---+---------------+---------------------+")
-    print("|  Rank Type |        Rank Name | # |     Game Time |           Timestamp |")
-    print("+------------+------------------+---+---------------+---------------------+")
+    print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))  # NOQA
+    print("+------------+------------------+---+---------------+---------------------+")  # NOQA
+    print("|  Rank Type |        Rank Name | # |     Game Time | Timestamp |")
+    print("+------------+------------------+---+---------------+---------------------+")  # NOQA
     r = api.profile['stats']['ranks']
     for rankType in sorted(api.profile['commander']['rank']):
         rank = api.profile['commander']['rank'][rankType]
@@ -563,7 +559,7 @@ def Main():
             maxTS
             )
         )
-    print("+------------+------------------+---+---------------+---------------------+")
+    print("+------------+------------------+---+---------------+---------------------+")  # NOQA
     print('Docked:', api.profile['commander']['docked'])
 
     system = api.profile['lastSystem']['name']
@@ -575,22 +571,25 @@ def Main():
     if args.vars:
         print('Writing {}...'.format(api._envfile))
         with open(api._envfile, "w") as myfile:
-            myfile.write('export TDFROM="{}/{}"\n'.format(
+            myfile.write(
+                'export TDFROM="{}/{}"\n'.format(
                     api.profile['lastSystem']['name'],
                     api.profile['lastStarport']['name']
                 )
             )
-            myfile.write('export TDCREDITS={}\n'.format(
+            myfile.write(
+                'export TDCREDITS={}\n'.format(
                     api.profile['commander']['credits']
                 )
             )
-            myfile.write('export TDCAP={}\n'.format(
+            myfile.write(
+                'export TDCAP={}\n'.format(
                     api.profile['ship']['cargo']['capacity']
                 )
             )
 
     # Setup TD
-    print ('Initializing TradeDangerous...')
+    print('Initializing TradeDangerous...')
     import tradeenv
     tdenv = tradeenv.TradeEnv()
     if args.tdpath is not '.':
@@ -610,17 +609,23 @@ def Main():
     if not station_lookup:
         print(c.WARNING+'WARNING! Station unknown.'+c.ENDC)
         print('Adding station...')
-        lsFromStar = input("Distance from star (enter for 0): ") or 0
+        lsFromStar = input(
+            "Distance from star (enter for 0): "
+        ) or 0
         lsFromStar = int(lsFromStar)
-        blackMarket = input("Black market present (Y, N or enter for ?): ") or '?'
-        maxPadSize = input("Max pad size (S, M, L or enter for ?): ") or '?'
+        blackMarket = input(
+            "Black market present (Y, N or enter for ?): "
+        ) or '?'
+        maxPadSize = input(
+            "Max pad size (S, M, L or enter for ?): "
+        ) or '?'
         system_lookup = tdb.lookupSystem(system)
         if tdb.addLocalStation(
-            system = system_lookup,
-            name = station,
-            lsFromStar = lsFromStar,
-            blackMarket = blackMarket,
-            maxPadSize = maxPadSize,
+            system=system_lookup,
+            name=station,
+            lsFromStar=lsFromStar,
+            blackMarket=blackMarket,
+            maxPadSize=maxPadSize,
         ):
             lines, csvPath = csvexport.exportTableToFile(
                 tdb,
@@ -637,20 +642,28 @@ def Main():
         maxPadSize = station_lookup.maxPadSize
 
         if lsFromStar == 0:
-            lsFromStar = input("Update distance from star (enter for 0): ") or 0
+            lsFromStar = input(
+                "Update distance from star (enter for 0): "
+            ) or 0
             lsFromStar = int(lsFromStar)
         if blackMarket is '?':
-            blackMarket = input("Update black market present (Y, N or enter for ?): ") or '?'
+            blackMarket = input(
+                "Update black market present (Y, N or enter for ?): "
+            ) or '?'
         if maxPadSize is '?':
-            maxPadSize = input("Update max pad size (S, M, L or enter for ?): ") or '?'
-        if (lsFromStar != station_lookup.lsFromStar or
+            maxPadSize = input(
+                "Update max pad size (S, M, L or enter for ?): "
+            ) or '?'
+        if (
+            lsFromStar != station_lookup.lsFromStar or
             blackMarket != station_lookup.blackMarket or
-            maxPadSize != station_lookup.maxPadSize):
+            maxPadSize != station_lookup.maxPadSize
+        ):
             if tdb.updateLocalStation(
-                station = station_lookup,
-                lsFromStar = lsFromStar,
-                blackMarket = blackMarket,
-                maxPadSize = maxPadSize,
+                station=station_lookup,
+                lsFromStar=lsFromStar,
+                blackMarket=blackMarket,
+                maxPadSize=maxPadSize,
             ):
                 lines, csvPath = csvexport.exportTableToFile(
                     tdb,
@@ -662,7 +675,9 @@ def Main():
     # If a shipyard exists, update the ship vendor csv
     if 'ships' in api.profile['lastStarport']:
         print(c.OKBLUE+'Updating shipyard vendor...'+c.ENDC)
-        ships = list(api.profile['lastStarport']['ships']['shipyard_list'].keys())
+        ships = list(
+            api.profile['lastStarport']['ships']['shipyard_list'].keys()
+        )
         for ship in api.profile['lastStarport']['ships']['unavailable_list']:
             ships.append(ship['name'])
         db = tdb.getDB()
@@ -686,7 +701,11 @@ def Main():
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
-        print(c.FAIL+'This station does not appear to have a commodity market.'+c.ENDC)
+        print(
+            c.FAIL +
+            'This station does not appear to have a commodity market.' +
+            c.ENDC
+        )
         print('Keys for this station:')
         pprint(api.profile['lastStarport'].keys())
         sys.exit(1)
@@ -763,7 +782,7 @@ def Main():
             commodity['demand'] = str(int(commodity['demand']))+demand
 
         # Print price differences
-        oldCom = oldPrices.get(commodity['name'], (0,0))
+        oldCom = oldPrices.get(commodity['name'], (0, 0))
         diffSell = commodity['sellPrice'] - oldCom[0]
         diffBuy = commodity['buyPrice'] - oldCom[1]
 
@@ -828,9 +847,9 @@ def Main():
     # No errors.
     return False
 
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # __main__
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 if __name__ == "__main__":
     '''
     Command line invocation.
