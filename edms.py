@@ -619,6 +619,16 @@ def Main():
         maxPadSize = input(
             "Max pad size (S, M, L or enter for ?): "
         ) or '?'
+        # This is unreliable, so default to unknown.
+        if 'commodities' in api.profile['lastStarport']:
+            market = 'Y'
+        else:
+            market = '?'
+        # This is also unreliable, so default to unknown.
+        if 'ships' in api.profile['lastStarport']:
+            shipyard = 'Y'
+        else:
+            shipyard = '?'
         system_lookup = tdb.lookupSystem(system)
         if tdb.addLocalStation(
             system=system_lookup,
@@ -626,6 +636,8 @@ def Main():
             lsFromStar=lsFromStar,
             blackMarket=blackMarket,
             maxPadSize=maxPadSize,
+            market=market,
+            shipyard=shipyard,
         ):
             lines, csvPath = csvexport.exportTableToFile(
                 tdb,
@@ -633,6 +645,7 @@ def Main():
                 "Station"
             )
             tdenv.NOTE("{} updated.", csvPath)
+        station_lookup = tdb.lookupStation(station, system)
     else:
         print(c.OKGREEN+'Station found in station file.'+c.ENDC)
 
@@ -640,6 +653,8 @@ def Main():
         lsFromStar = station_lookup.lsFromStar
         blackMarket = station_lookup.blackMarket
         maxPadSize = station_lookup.maxPadSize
+        market = station_lookup.market
+        shipyard = station_lookup.shipyard
 
         if lsFromStar == 0:
             lsFromStar = input(
@@ -654,16 +669,26 @@ def Main():
             maxPadSize = input(
                 "Update max pad size (S, M, L or enter for ?): "
             ) or '?'
+        # This is unreliable, so default to unchanged.
+        if 'commodities' in api.profile['lastStarport']:
+            market = 'Y'
+        # This is also unreliable, so default to unchanged.
+        if 'ships' in api.profile['lastStarport']:
+            shipyard = 'Y'
         if (
             lsFromStar != station_lookup.lsFromStar or
             blackMarket != station_lookup.blackMarket or
-            maxPadSize != station_lookup.maxPadSize
+            maxPadSize != station_lookup.maxPadSize or
+            market != station_lookup.market or
+            shipyard != station_lookup.shipyard
         ):
             if tdb.updateLocalStation(
                 station=station_lookup,
                 lsFromStar=lsFromStar,
                 blackMarket=blackMarket,
                 maxPadSize=maxPadSize,
+                market=market,
+                shipyard=shipyard,
             ):
                 lines, csvPath = csvexport.exportTableToFile(
                     tdb,
