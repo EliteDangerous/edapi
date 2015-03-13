@@ -75,6 +75,7 @@ ship_names = {
     'Empire_Trader': 'Clipper',
     'Federation_Dropship': 'Dropship',
     'Federation_Fighter': 'Federation_Fighter',
+    'FerDeLance': 'Fer-de-Lance',
     'Hauler': 'Hauler',
     'Orca': 'Orca',
     'Python': 'Python',
@@ -83,6 +84,7 @@ ship_names = {
     'Type7': 'Type 7',
     'Type9': 'Type 9',
     'Viper': 'Viper',
+    'Vulture': 'Vulture',
 }
 
 rank_names = {
