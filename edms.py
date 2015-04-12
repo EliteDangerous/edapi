@@ -716,7 +716,7 @@ def Main():
                        VALUES
                        (?, ?)
                        """,
-                       [ship_lookup.ID, station_lookup.ID])
+                       (ship_lookup.ID, station_lookup.ID))
             db.commit()
         tdenv.NOTE("Updated {} ships in {} shipyard.", len(ships), station)
         lines, csvPath = csvexport.exportTableToFile(
@@ -753,15 +753,16 @@ def Main():
             Item
         WHERE
             Item.item_id = vPrice.item_id AND
-            System.name = '{}' AND
-            Station.name = '{}' AND
+            System.name = ? AND
+            Station.name = ? AND
             System.system_id = Station.system_id AND
             Station.station_id = vPrice.station_id
         ORDER BY Item.ui_order
-        """.format(
+        """,
+        (
             system,
             station
-            )
+        )
     )}
 
     print('Writing trade data...')
