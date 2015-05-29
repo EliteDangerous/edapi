@@ -6,19 +6,19 @@
 import argparse
 from datetime import datetime
 import getpass
-import http.client
-import http.cookiejar
-import json
 import os
 from pathlib import Path
+import pickle
 from pprint import pprint
+import requests
+from requests.utils import dict_from_cookiejar
+from requests.utils import cookiejar_from_dict
 import sys
 import tempfile
+import textwrap
 import traceback
-import urllib.parse
-import urllib.request as urllib2
 
-__version_info__ = ('2', '0', '0')
+__version_info__ = ('3', '0', '0')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -317,121 +317,101 @@ class EDAPI:
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
-    def __init__(self):
+    def __init__(self, basename='edms', debug=False, cookiefile=None):
         '''
         Initialize
         '''
 
-        self.args = args
-
-        # Bash colors.
-        self.c = ansiColors()
-
         # Build common file names from basename.
-        self._basename = args.basename
-        self._cookiefile = self._basename + '.cookies'
+        self._basename = basename
+        if cookiefile:
+            self._cookiefile = cookiefile
+        else:
+            self._cookiefile = self._basename + '.cookies'
+
         self._envfile = self._basename + '.vars'
 
-        if self.args.debug:
-            debug = 1
-        else:
-            debug = 0
+        self.debug = debug
+        #if self.debug:
+        #    import http.client
+        #    http.client.HTTPConnection.debuglevel = 3
 
-        # Create the cookie jar.
-        self.cookie = http.cookiejar.MozillaCookieJar(self._cookiefile)
+        # Setup the HTTP session.
+        self.opener = requests.Session()
+
+        self.opener.headers = {
+            'User-Agent': self._agent
+        }
+
+        # Read/create the cookie jar.
         try:
-            self.cookie.load(ignore_discard=True, ignore_expires=True)
+            if os.path.exists(self._cookiefile):
+                with open(self._cookiefile, 'rb') as h:
+                    self.opener.cookies = cookiejar_from_dict(pickle.load(h))
         except:
-            self.cookie.save(ignore_discard=True, ignore_expires=True)
+            print('Unable to read cookie file.')
 
-        # Setup a custom opener.
-        self.opener = urllib2.build_opener(
-            urllib2.HTTPCookieProcessor(self.cookie),
-            urllib2.HTTPRedirectHandler(),
-            urllib2.HTTPHandler(debuglevel=debug),
-            urllib2.HTTPSHandler(debuglevel=debug),
-        )
-
-        self.opener.addheaders = [
-            ('User-Agent', self._agent),
-        ]
-
-        urllib2.install_opener(self.opener)
+        else:
+            with open(self._cookiefile, 'wb') as h:
+                pickle.dump(dict_from_cookiejar(self.opener.cookies), h)
 
         # Grab the commander profile
-        response = self._getURI('profile').read().decode()
+        response = self._getURI('profile')
         try:
-            self.profile = json.loads(response)
+            self.profile = response.json()
         except:
             sys.exit('Unable to parse JSON response for /profile!\
                      Try with --debug and report this.')
 
-        if self.args.debug:
-            pprint(self.profile)
-
     def _getBasicURI(self, uri, values=None):
         '''
-        Perform a GET/POST to a URI with proper login and
-        debug handling.
+        Perform a GET/POST to a URI
         '''
 
-        # Encode any post variables.
+        # POST if data is present, otherwise GET. 
         if values is None:
-            data = None
+            if self.debug:
+                print('GET on: ', self._baseurl+uri)
+                print(dict_from_cookiejar(self.opener.cookies))
+            response = self.opener.get(self._baseurl+uri)
         else:
-            data = urllib.parse.urlencode(values)
-            data = data.encode('utf-8')
+            if self.debug:
+                print('POST on: ', self._baseurl+uri)
+                print(dict_from_cookiejar(self.opener.cookies))
+            response = self.opener.post(self._baseurl+uri, data=values)
 
-        # Debug info for the GET/POST.
-        if self.args.debug:
-            print(self.c.OKBLUE+'-----')
-            if data is None:
-                print('GET: ', end='')
-                print(self._baseurl+uri, self.c.ENDC)
-            else:
-                print('POST: ', end='')
-                print(self._baseurl+uri, data, self.c.ENDC)
-
-        # Open the URL.
-        if data is None:
-                response = self.opener.open(self._baseurl+uri)
-        else:
-                response = self.opener.open(self._baseurl+uri, data)
-
-        # Debug info for the response.
-        if self.args.debug:
-            print(self.c.HEADER+'-----')
-            print('HTTP', response.code)
-            print(response.url)
-            print()
-            print(response.info(), self.c.OKGREEN)
-            print(self.c.ENDC)
+        if self.debug:
+            print('Final URL:', response.url)
+            print(dict_from_cookiejar(self.opener.cookies))
 
         # Save the cookies.
-        self.cookie.save(ignore_discard=True, ignore_expires=True)
+        with open(self._cookiefile, 'wb') as h:
+          pickle.dump(dict_from_cookiejar(self.opener.cookies), h)
 
         # Return the response object.
         return response
 
     def _getURI(self, uri, values=None):
         '''
-        Perform a GET/POST and make sure the login
-        cookies are valid
+        Perform a GET/POST and try to login if needed.
         '''
 
-        # Try the URL. If our credentials are no good, try to
+        # Try the URI. If our credentials are no good, try to
         # login then ask again.
-
         response = self._getBasicURI(uri, values=values)
 
         if str(response.url).endswith('user/login'):
             self._doLogin()
-            response = self._getBasicURI(uri, values)
+            response = self._getBasicURI(uri, values=values)
 
         if str(response.url).endswith('user/login'):
-            sys.exit("Something went terribly wrong. The login credentials\
-                     appear correct, but we are being denied access.\n\
-                     Try using --debug and report this.")
+            sys.exit(textwrap.fill(textwrap.dedent("""\
+                Something went terribly wrong. The login credentials
+                appear correct, but we are being denied access. Sometimes the
+                API is slow to update, so if you are authenticating for the
+                first time, wait a minute or so and try again. If this
+                persists try using --debug and report this.
+                """)))
 
         return response
 
@@ -444,11 +424,32 @@ class EDAPI:
 
         # Our current cookies look okay? No need to login.
         if str(response.url).endswith('/'):
-            if self.args.debug:
-                print('Current auth is valid!')
             return
 
-        # Performe the login POST.
+        # Perform the login POST.
+        print(textwrap.fill(textwrap.dedent("""\
+              You do not appear to have any valid login cookies set.
+              We will attempt to log you in with your Frontier
+              account, and cache your auth cookies for future use.
+              THIS WILL NOT STORE YOUR USER NAME AND PASSWORD.
+              """)))
+
+        print("\nYour auth cookies will be stored here:")
+
+        print("\n"+self._cookiefile+"\n")
+
+        print(textwrap.fill(textwrap.dedent("""\
+            It is advisable that you keep this file secret. It may
+            be possible to hijack your account with the information
+            it contains.
+            """)))
+
+        print(
+            "\nIf you are not comfortable with this, "
+            "DO NOT USE THIS TOOL."
+        )
+        print()
+
         values = {}
         values['email'] = input("User Name (email):")
         values['password'] = getpass.getpass()
@@ -496,7 +497,7 @@ def Main():
             print(key, end="->")
         print()
 
-        # Start a thr root
+        # Start a the root
         ref = api.profile
         # Try to walk the tree
         for key in args.keys[0]:
@@ -534,7 +535,7 @@ def Main():
     print('Debt     : {:>12,d}'.format(api.profile['commander']['debt']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))  # NOQA
     print("+------------+------------------+---+---------------+---------------------+")  # NOQA
-    print("|  Rank Type |        Rank Name | # |     Game Time | Timestamp |")
+    print("|  Rank Type |        Rank Name | # |     Game Time | Timestamp           |")
     print("+------------+------------------+---+---------------+---------------------+")  # NOQA
     r = api.profile['stats']['ranks']
     for rankType in sorted(api.profile['commander']['rank']):
@@ -640,6 +641,10 @@ def Main():
             maxPadSize=maxPadSize,
             market=market,
             shipyard=shipyard,
+            outfitting='?',
+            rearm='?',
+            refuel='?',
+            repair='?'
         ):
             lines, csvPath = csvexport.exportTableToFile(
                 tdb,
@@ -744,19 +749,19 @@ def Main():
         """
         SELECT
             Item.name,
-            vPrice.sell_to,
-            vPrice.buy_from
+            StationItem.demand_price,
+            StationItem.supply_price
         FROM
-            vPrice,
+            StationItem,
             System,
             Station,
             Item
         WHERE
-            Item.item_id = vPrice.item_id AND
+            Item.item_id = StationItem.item_id AND
             System.name = ? AND
             Station.name = ? AND
             System.system_id = Station.system_id AND
-            Station.station_id = vPrice.station_id
+            Station.station_id = StationItem.station_id
         ORDER BY Item.ui_order
         """,
         (
@@ -869,8 +874,7 @@ def Main():
     cache.importDataFromFile(tdb, tdenv, fpath)
 
     # Remove the temp file.
-    if not args.debug:
-        fpath.unlink()
+    fpath.unlink()
 
     # No errors.
     return False
@@ -897,8 +901,6 @@ if __name__ == "__main__":
     except SystemExit as e:
         # Clean exit, provide a return code.
         sys.exit(e.code)
-    except urllib2.HTTPError as e:
-        print('HTTP error:', str(e.code))
     except:
         # Handle all other exceptions.
         ErrStr = traceback.format_exc()

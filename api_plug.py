@@ -6,15 +6,15 @@
 import cache
 import csvexport
 import getpass
-import http.client
-import http.cookiejar
-import json
+import os
 import pathlib
 import plugins
+import pickle
+import requests
+from requests.utils import dict_from_cookiejar
+from requests.utils import cookiejar_from_dict
 import sys
 import textwrap
-import urllib.parse
-import urllib.request as urllib2
 
 # ----------------------------------------------------------------
 # Deal with some differences in names between TD, ED and the API.
@@ -79,86 +79,105 @@ class EDAPI:
 
     _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'  # NOQA
     _baseurl = 'https://companion.orerve.net/'
+    _basename = 'edms'
+    _cookiefile = _basename + '.cookies'
+    _envfile = _basename + '.vars'
 
-    def __init__(self, cookiefile):
+    def __init__(self, basename='edms', debug=False, cookiefile=None):
         '''
         Initialize
         '''
 
-        self._cookiefile = cookiefile
+        # Build common file names from basename.
+        self._basename = basename
+        if cookiefile:
+            self._cookiefile = cookiefile
+        else:
+            self._cookiefile = self._basename + '.cookies'
 
-        # Create the cookie jar.
-        self.cookie = http.cookiejar.MozillaCookieJar(self._cookiefile)
+        self._envfile = self._basename + '.vars'
+
+        self.debug = debug
+        #if self.debug:
+        #    import http.client
+        #    http.client.HTTPConnection.debuglevel = 3
+
+        # Setup the HTTP session.
+        self.opener = requests.Session()
+
+        self.opener.headers = {
+            'User-Agent': self._agent
+        }
+
+        # Read/create the cookie jar.
         try:
-            self.cookie.load(ignore_discard=True, ignore_expires=True)
+            if os.path.exists(self._cookiefile):
+                with open(self._cookiefile, 'rb') as h:
+                    self.opener.cookies = cookiejar_from_dict(pickle.load(h))
         except:
-            self.cookie.save(ignore_discard=True, ignore_expires=True)
+            print('Unable to read cookie file.')
 
-        # Setup a custom opener.
-        self.opener = urllib2.build_opener(
-            urllib2.HTTPCookieProcessor(self.cookie),
-            urllib2.HTTPRedirectHandler(),
-            urllib2.HTTPHandler(),
-            urllib2.HTTPSHandler(),
-        )
-
-        self.opener.addheaders = [
-            ('User-Agent', self._agent),
-        ]
-
-        urllib2.install_opener(self.opener)
+        else:
+            with open(self._cookiefile, 'wb') as h:
+                pickle.dump(dict_from_cookiejar(self.opener.cookies), h)
 
         # Grab the commander profile
-        response = self._getURI('profile').read().decode()
+        response = self._getURI('profile')
         try:
-            self.profile = json.loads(response)
+            self.profile = response.json()
         except:
-            sys.exit('Unable to parse JSON response for /profile!')
+            sys.exit('Unable to parse JSON response for /profile!\
+                     Try with --debug and report this.')
 
     def _getBasicURI(self, uri, values=None):
         '''
-        Perform a GET/POST to a URI with POST encoding and cookie handling.
+        Perform a GET/POST to a URI
         '''
 
-        # Encode any post variables.
+        # POST if data is present, otherwise GET. 
         if values is None:
-            data = None
+            if self.debug:
+                print('GET on: ', self._baseurl+uri)
+                print(dict_from_cookiejar(self.opener.cookies))
+            response = self.opener.get(self._baseurl+uri)
         else:
-            data = urllib.parse.urlencode(values)
-            data = data.encode('utf-8')
+            if self.debug:
+                print('POST on: ', self._baseurl+uri)
+                print(dict_from_cookiejar(self.opener.cookies))
+            response = self.opener.post(self._baseurl+uri, data=values)
 
-        # Open the URL.
-        if data is None:
-                response = self.opener.open(self._baseurl+uri)
-        else:
-                response = self.opener.open(self._baseurl+uri, data)
+        if self.debug:
+            print('Final URL:', response.url)
+            print(dict_from_cookiejar(self.opener.cookies))
 
         # Save the cookies.
-        self.cookie.save(ignore_discard=True, ignore_expires=True)
+        with open(self._cookiefile, 'wb') as h:
+          pickle.dump(dict_from_cookiejar(self.opener.cookies), h)
 
         # Return the response object.
         return response
 
     def _getURI(self, uri, values=None):
         '''
-        Perform a GET/POST and make sure the login
-        cookies are valid
+        Perform a GET/POST and try to login if needed.
         '''
 
-        # Try the URL. If our credentials are no good, try to
+        # Try the URI. If our credentials are no good, try to
         # login then ask again.
-
         response = self._getBasicURI(uri, values=values)
 
         if str(response.url).endswith('user/login'):
             self._doLogin()
-            response = self._getBasicURI(uri, values)
+            response = self._getBasicURI(uri, values=values)
 
         if str(response.url).endswith('user/login'):
-            sys.exit(
-                "Something went terribly wrong. The login credentials appear"
-                "correct, but we are being denied access.\n"
-            )
+            sys.exit(textwrap.fill(textwrap.dedent("""\
+                Something went terribly wrong. The login credentials
+                appear correct, but we are being denied access. Sometimes the
+                API is slow to update, so if you are authenticating for the
+                first time, wait a minute or so and try again. If this
+                persists try using --debug and report this.
+                """)))
 
         return response
 
@@ -193,12 +212,12 @@ class EDAPI:
 
         print(
             "\nIf you are not comfortable with this, "
-            "DO NOT USE THIS PLUGIN."
+            "DO NOT USE THIS TOOL."
         )
         print()
 
         values = {}
-        values['email'] = input("User Name (email): ")
+        values['email'] = input("User Name (email):")
         values['password'] = getpass.getpass()
         response = self._getBasicURI('user/login', values=values)
 
@@ -210,13 +229,11 @@ class EDAPI:
         # Check to see if we need to do the auth token dance.
         if str(response.url).endswith('user/confirm'):
             print()
-            print(
-                "A verification code should have been sent to your"
-                "email address."
-            )
+            print("A verification code should have been sent to your "
+                  "email address.")
             print("Please provide that code (case sensitive!)")
             values = {}
-            values['code'] = input("Code: ")
+            values['code'] = input("Code:")
             response = self._getBasicURI('user/confirm', values=values)
 
 
@@ -240,7 +257,7 @@ class ImportPlugin(plugins.ImportPluginBase):
 
         # Connect to the API, authenticate, and pull down the commander
         # /profile.
-        api = EDAPI(str(self.cookiePath))
+        api = EDAPI(cookiefile=str(self.cookiePath))
 
         # Sanity check that the commander is docked. Otherwise we will get a
         # mismatch between the last system and last station.
@@ -304,6 +321,10 @@ class ImportPlugin(plugins.ImportPluginBase):
                 maxPadSize=maxPadSize,
                 market=market,
                 shipyard=shipyard,
+                outfitting='?',
+                rearm='?',
+                refuel='?',
+                repair='?'
             ):
                 lines, csvPath = csvexport.exportTableToFile(
                     tdb,
