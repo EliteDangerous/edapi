@@ -182,7 +182,8 @@ def parse_args():
     '''
     # Basic argument parsing.
     parser = argparse.ArgumentParser(
-        description='EDMS: Elite Dangerous Market Scraper'
+        description='EDMS: Elite Dangerous Market Scraper',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     # Version
@@ -208,20 +209,20 @@ def parse_args():
     parser.add_argument("--basename",
                         default="edms",
                         help='Base file name. This is used to construct the\
-                        cookie and vars file names. Defaults to "edms"')
+                        cookie and vars file names.')
 
     # tdpath
     parser.add_argument("--tdpath",
                         default=".",
                         help="Path to the TradeDangerous root. This is used to\
                         locate the TradeDangerous python modules and data/\
-                        directory. Defaults to the cwd.")
+                        directory.")
 
     # colors
     parser.add_argument("--no-color",
-                        dest="color",
-                        action="store_false",
-                        default=True,
+                        dest="nocolor",
+                        action="store_true",
+                        default=False,
                         help="Disable the use of ansi colors in output.")
 
     # keys
@@ -300,10 +301,10 @@ class ansiColors:
     }
 
     def __init__(self):
-        if args.color:
-            self.__dict__.update(ansiColors.defaults)
-        else:
+        if args.nocolor:
             self.__dict__.update({n: '' for n in ansiColors.defaults.keys()})
+        else:
+            self.__dict__.update(ansiColors.defaults)
 
 
 class EDAPI:
@@ -880,10 +881,10 @@ def Main():
                 buyColor = c.OKGREEN
             else:
                 buyColor = c.ENDC
-            if args.color:
-                s = "{:>25} {:>5}{:<17} {:>5}{:<17}"
-            else:
+            if args.nocolor:
                 s = "{:>25} {:>5}{:<8} {:>5}{:<8}"
+            else:
+                s = "{:>25} {:>5}{:<17} {:>5}{:<17}"
             print(s.format(
                 commodity['name'],
                 commodity['sellPrice'],

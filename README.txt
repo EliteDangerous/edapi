@@ -21,21 +21,22 @@ EDMS: Elite Dangerous Market Scraper
 optional arguments:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
-  --debug               Output additional debug info.
+  --debug               Output additional debug info. (default: False)
   --vars                Output a file that sets environment variables for
                         current cargo capacity, credits, and current
-                        system/station.
+                        system/station. (default: False)
   --basename BASENAME   Base file name. This is used to construct the cookie
-                        and vars file names. Defaults to "edms"
+                        and vars file names. (default: edms)
   --tdpath TDPATH       Path to the TradeDangerous root. This is used to
                         locate the TradeDangerous python modules and data/
-                        directory. Defaults to the cwd.
-  --no-color            Disable the use of ansi colors in output.
+                        directory. (default: .)
+  --no-color            Disable the use of ansi colors in output. (default:
+                        False)
   --keys [KEYS [KEYS ...]]
                         Instead of normal import, display raw API data given a
-                        set of dictionary keys.
+                        set of dictionary keys. (default: None)
   --tree                Used with --keys. If present will print all content
-                        below the specified key.
+                        below the specificed key. (default: False)
 
 ==============================================================================
 == TradeDangerous plugin usage:
