@@ -302,6 +302,18 @@ class ImportPlugin(plugins.ImportPluginBase):
             maxPadSize = input(
                 "Max pad size (S, M, L or enter for ?): "
             ) or '?'
+            outfitting = input(
+                "Outfitting present (Y, N or enter for ?): "
+            ) or '?'
+            rearm = input(
+                "Rearm present (Y, N or enter for ?): "
+            ) or '?'
+            refuel = input(
+                "Refuel present (Y, N or enter for ?): "
+            ) or '?'
+            repair = input(
+                "Repair present (Y, N or enter for ?): "
+            ) or '?'
             # This is unreliable, so default to unknown.
             if 'commodities' in api.profile['lastStarport']:
                 market = 'Y'
@@ -321,10 +333,10 @@ class ImportPlugin(plugins.ImportPluginBase):
                 maxPadSize=maxPadSize,
                 market=market,
                 shipyard=shipyard,
-                outfitting='?',
-                rearm='?',
-                refuel='?',
-                repair='?'
+                outfitting=outfitting,
+                rearm=rearm,
+                refuel=refuel,
+                repair=repair
             ):
                 lines, csvPath = csvexport.exportTableToFile(
                     tdb,
@@ -341,6 +353,10 @@ class ImportPlugin(plugins.ImportPluginBase):
             maxPadSize = station_lookup.maxPadSize
             market = station_lookup.market
             shipyard = station_lookup.shipyard
+            outfitting = station_lookup.outfitting
+            rearm = station_lookup.rearm
+            refuel = station_lookup.refuel
+            repair = station_lookup.repair
 
             if lsFromStar == 0:
                 lsFromStar = input(
@@ -358,6 +374,26 @@ class ImportPlugin(plugins.ImportPluginBase):
                     "Update max pad size (S, M, L or enter for ?): "
                 ) or '?'
 
+            if outfitting is '?':
+                outfitting = input(
+                    "Update outfitting present (Y, N or enter for ?): "
+                ) or '?'
+
+            if rearm is '?':
+                rearm = input(
+                    "Update rearm present (Y, N or enter for ?): "
+                ) or '?'
+
+            if refuel is '?':
+                refuel = input(
+                    "Update refuel present (Y, N or enter for ?): "
+                ) or '?'
+
+            if repair is '?':
+                repair = input(
+                    "Update repair present (Y, N or enter for ?): "
+                ) or '?'
+
             # This is unreliable, so default to unchanged.
             if 'commodities' in api.profile['lastStarport']:
                 market = 'Y'
@@ -371,7 +407,11 @@ class ImportPlugin(plugins.ImportPluginBase):
                 blackMarket != station_lookup.blackMarket or
                 maxPadSize != station_lookup.maxPadSize or
                 market != station_lookup.market or
-                shipyard != station_lookup.shipyard
+                shipyard != station_lookup.shipyard or
+                outfitting != station_lookup.outfitting or
+                rearm != station_lookup.rearm or
+                refuel != station_lookup.refuel or
+                repair != station_lookup.repair
             ):
                 if tdb.updateLocalStation(
                     station=station_lookup,
@@ -380,6 +420,10 @@ class ImportPlugin(plugins.ImportPluginBase):
                     maxPadSize=maxPadSize,
                     market=market,
                     shipyard=shipyard,
+                    outfitting=outfitting,
+                    rearm=rearm,
+                    refuel=refuel,
+                    repair=repair
                 ):
                     lines, csvPath = csvexport.exportTableToFile(
                         tdb,
