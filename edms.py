@@ -122,6 +122,8 @@ rank_names = {
         'Viscount',
         'Count',
         'Earl',
+        'Marquis',
+        'Duke',
     ),
     'explore': (
         'Aimless',
@@ -146,6 +148,9 @@ rank_names = {
         'Lieutenant',
         'Lieutenant Commander',
         'Post Commander',
+        'Post Captain',
+        'Rear Admiral',
+        'Vice Admiral',
     ),
     'service': (
         'Rank 0',
