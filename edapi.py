@@ -345,12 +345,6 @@ class EDAPI:
         Initialize
         '''
 
-        # If json_file was given, just load that instead.
-        if json_file:
-            with open(json_file) as file:
-                self.profile = json.load(file)
-                return
-
         # Build common file names from basename.
         self._basename = basename
         if cookiefile:
@@ -361,6 +355,13 @@ class EDAPI:
         self._envfile = self._basename + '.vars'
 
         self.debug = debug
+
+        # If json_file was given, just load that instead.
+        if json_file:
+            with open(json_file) as file:
+                self.profile = json.load(file)
+                return
+
         #if self.debug:
         #    import http.client
         #    http.client.HTTPConnection.debuglevel = 3
