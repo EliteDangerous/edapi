@@ -205,7 +205,8 @@ def parse_args():
                         help="Output additional debug info.")
 
     # JSON
-    parser.add_argument("--json",
+    parser.add_argument("--import",
+                        metavar="FILE",
                         dest="json_file",
                         default=None,
                         help="Import API info from a JSON file instead of the\
@@ -213,9 +214,9 @@ def parse_args():
 
     # Export
     parser.add_argument("--export",
-                        action="store_true",
-                        default=False,
-                        help="Output API response as JSON.")
+                        metavar="FILE",
+                        default=None,
+                        help="Export API response to a file as JSON.")
 
     # vars file
     parser.add_argument("--vars",
@@ -516,8 +517,9 @@ def Main():
 
     # User specified --export. Print JSON and exit.
     if args.export:
-        print(json.dumps(api.profile, indent=4, sort_keys=True))
-        sys.exit()
+        with open(args.export, 'w') as outfile:
+            json.dump(api.profile, outfile, indent=4, sort_keys=True)
+            sys.exit()
 
     # Colors
     c = ansiColors()

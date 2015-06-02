@@ -12,7 +12,7 @@ TradeDangerous with station, market, and shipyard data.
 Either place edapi.py in the TradeDangerous root, or tell it where to
 find TradeDangerous with the --tdpath option.
 
-usage: edapi.py [-h] [--version] [--debug] [--json JSON_FILE] [--export]
+usage: edapi.py [-h] [--version] [--debug] [--import FILE] [--export FILE]
                 [--vars] [--basename BASENAME] [--tdpath TDPATH] [--no-color]
                 [--keys [KEYS [KEYS ...]]] [--tree]
 
@@ -22,9 +22,9 @@ optional arguments:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
   --debug               Output additional debug info. (default: False)
-  --json JSON_FILE      Import API info from a JSON file instead of the API.
+  --import FILE         Import API info from a JSON file instead of the API.
                         Used mostly for debugging purposes. (default: None)
-  --export              Output API response as JSON. (default: False)
+  --export FILE         Export API response to a file as JSON. (default: None)
   --vars                Output a file that sets environment variables for
                         current cargo capacity, credits, and current
                         system/station. (default: False)
