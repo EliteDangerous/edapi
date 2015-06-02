@@ -6,6 +6,7 @@
 import argparse
 from datetime import datetime
 import getpass
+import json
 import os
 from pathlib import Path
 import platform
@@ -203,6 +204,19 @@ def parse_args():
                         default=False,
                         help="Output additional debug info.")
 
+    # JSON
+    parser.add_argument("--json",
+                        dest="json_file",
+                        default=None,
+                        help="Import API info from a JSON file instead of the\
+                        API. Used mostly for debugging purposes.")
+
+    # Export
+    parser.add_argument("--export",
+                        action="store_true",
+                        default=False,
+                        help="Output API response as JSON.")
+
     # vars file
     parser.add_argument("--vars",
                         action="store_true",
@@ -325,10 +339,16 @@ class EDAPI:
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
-    def __init__(self, basename='edapi', debug=False, cookiefile=None):
+    def __init__(self, basename='edapi', debug=False, cookiefile=None, json_file=None):
         '''
         Initialize
         '''
+
+        # If json_file was given, just load that instead.
+        if json_file:
+            with open(json_file) as file:
+                self.profile = json.load(file)
+                return
 
         # Build common file names from basename.
         self._basename = basename
@@ -492,7 +512,12 @@ def Main():
     sys.path.insert(0, args.tdpath)
 
     # Connect to the API and grab all the info!
-    api = EDAPI(debug=args.debug)
+    api = EDAPI(debug=args.debug, json_file=args.json_file)
+
+    # User specified --export. Print JSON and exit.
+    if args.export:
+        print(json.dumps(api.profile, indent=4, sort_keys=True))
+        sys.exit()
 
     # Colors
     c = ansiColors()
