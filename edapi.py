@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ----------------------------------------------------------------
-# Elite: Dangerous Market Scraper
+# Elite: Dangerous API Tool
 # ----------------------------------------------------------------
 
 import argparse
@@ -19,7 +19,7 @@ import tempfile
 import textwrap
 import traceback
 
-__version_info__ = ('3', '0', '0')
+__version_info__ = ('3', '1', '0')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -188,7 +188,7 @@ def parse_args():
     '''
     # Basic argument parsing.
     parser = argparse.ArgumentParser(
-        description='EDMS: Elite Dangerous Market Scraper',
+        description='EDAPI: Elite Dangerous API Tool',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -213,7 +213,7 @@ def parse_args():
 
     # Base file name.
     parser.add_argument("--basename",
-                        default="edms",
+                        default="edapi",
                         help='Base file name. This is used to construct the\
                         cookie and vars file names.')
 
@@ -321,11 +321,11 @@ class EDAPI:
 
     _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'  # NOQA
     _baseurl = 'https://companion.orerve.net/'
-    _basename = 'edms'
+    _basename = 'edapi'
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
-    def __init__(self, basename='edms', debug=False, cookiefile=None):
+    def __init__(self, basename='edapi', debug=False, cookiefile=None):
         '''
         Initialize
         '''

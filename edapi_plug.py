@@ -79,11 +79,11 @@ class EDAPI:
 
     _agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12B411'  # NOQA
     _baseurl = 'https://companion.orerve.net/'
-    _basename = 'edms'
+    _basename = 'edapi'
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
-    def __init__(self, basename='edms', debug=False, cookiefile=None):
+    def __init__(self, basename='edapi', debug=False, cookiefile=None):
         '''
         Initialize
         '''
