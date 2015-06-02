@@ -628,7 +628,10 @@ def Main():
 
     # Setup TD
     print('Initializing TradeDangerous...')
-    import tradeenv
+    try:
+        import tradeenv
+    except:
+        sys.exit('Can\'t find TradeDangerous. Do you need --tdpath?')
     tdenv = tradeenv.TradeEnv()
     if args.tdpath is not '.':
         tdenv.dataDir = args.tdpath+'/data'
