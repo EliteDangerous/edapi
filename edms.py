@@ -8,6 +8,7 @@ from datetime import datetime
 import getpass
 import os
 from pathlib import Path
+import platform
 import pickle
 from pprint import pprint
 import requests
@@ -224,10 +225,11 @@ def parse_args():
                         directory.")
 
     # colors
+    default = (platform.system() == 'Windows')
     parser.add_argument("--no-color",
                         dest="nocolor",
                         action="store_true",
-                        default=False,
+                        default=default,
                         help="Disable the use of ansi colors in output.")
 
     # keys
