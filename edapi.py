@@ -341,7 +341,13 @@ class EDAPI:
     _cookiefile = _basename + '.cookies'
     _envfile = _basename + '.vars'
 
-    def __init__(self, basename='edapi', debug=False, cookiefile=None, json_file=None):
+    def __init__(
+        self,
+        basename='edapi',
+        debug=False,
+        cookiefile=None,
+        json_file=None
+    ):
         '''
         Initialize
         '''
@@ -363,9 +369,9 @@ class EDAPI:
                 self.profile = json.load(file)
                 return
 
-        #if self.debug:
-        #    import http.client
-        #    http.client.HTTPConnection.debuglevel = 3
+        # if self.debug:
+        #     import http.client
+        #     http.client.HTTPConnection.debuglevel = 3
 
         # Setup the HTTP session.
         self.opener = requests.Session()
@@ -380,7 +386,8 @@ class EDAPI:
             # Please don't disable this.
             delta = time.time()-os.path.getmtime(self._cookiefile)
             if delta < 10:
-                sys.exit('You must wait at least 10 seconds between queries to the API. Try again in about {} seconds'.format
+                sys.exit('You must wait at least 10 seconds between queries ' +
+                         'to the API. Try again in about {} seconds'.format
                          (int(10-delta)))
             try:
                 with open(self._cookiefile, 'rb') as h:
@@ -405,7 +412,7 @@ class EDAPI:
         Perform a GET/POST to a URI
         '''
 
-        # POST if data is present, otherwise GET. 
+        # POST if data is present, otherwise GET.
         if values is None:
             if self.debug:
                 print('GET on: ', self._baseurl+uri)
@@ -423,7 +430,7 @@ class EDAPI:
 
         # Save the cookies.
         with open(self._cookiefile, 'wb') as h:
-          pickle.dump(dict_from_cookiejar(self.opener.cookies), h)
+            pickle.dump(dict_from_cookiejar(self.opener.cookies), h)
 
         # Return the response object.
         return response
@@ -578,7 +585,7 @@ def Main():
     print('Debt     : {:>12,d}'.format(api.profile['commander']['debt']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))  # NOQA
     print("+------------+------------------+---+---------------+---------------------+")  # NOQA
-    print("|  Rank Type |        Rank Name | # |     Game Time | Timestamp           |")
+    print("|  Rank Type |        Rank Name | # |     Game Time | Timestamp           |")  # NOQA
     print("+------------+------------------+---+---------------+---------------------+")  # NOQA
     r = api.profile['stats']['ranks']
     for rankType in sorted(api.profile['commander']['rank']):
