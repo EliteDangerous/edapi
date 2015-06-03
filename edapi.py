@@ -577,19 +577,22 @@ def Main():
     for rankType in sorted(api.profile['commander']['rank']):
         rank = api.profile['commander']['rank'][rankType]
         if rankType in rank_names:
-            rankName = rank_names[rankType][rank]
+            try:
+                rankName = rank_names[rankType][rank]
+            except:
+                rankName = "Rank "+str(rank)
         else:
             rankName = ''
-        if rankType in r:
+        try:
             maxGT = max([r[rankType][x]['gt'] for x in r[rankType].keys()])
             maxTS = max([r[rankType][x]['ts'] for x in r[rankType].keys()])
-        else:
-            maxGT = ''
+        except:
+            maxGT = 'Unkown'
             maxTS = 0
         if maxTS:
             maxTS = datetime.fromtimestamp(maxTS).isoformat()
         else:
-            maxTS = ''
+            maxTS = 'Unkown'
         print("| {:>10} | {:>16} | {:1} | {:>13} | {:19} |".format(
             rankType,
             rankName,
