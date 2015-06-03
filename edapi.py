@@ -21,7 +21,7 @@ import textwrap
 import time
 import traceback
 
-__version_info__ = ('3', '1', '0')
+__version_info__ = ('3', '1', '1')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -104,14 +104,6 @@ rank_names = {
     ),
     'crime': (
         'Rank 0',
-        'Rank 1',
-        'Rank 2',
-        'Rank 3',
-        'Rank 4',
-        'Rank 5',
-        'Rank 6',
-        'Rank 7',
-        'Rank 8',
     ),
     'empire': (
         'None',
@@ -157,14 +149,6 @@ rank_names = {
     ),
     'service': (
         'Rank 0',
-        'Rank 1',
-        'Rank 2',
-        'Rank 3',
-        'Rank 4',
-        'Rank 5',
-        'Rank 6',
-        'Rank 7',
-        'Rank 8',
     ),
     'trade': (
         'Penniless',
