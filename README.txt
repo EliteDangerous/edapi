@@ -1,6 +1,6 @@
 ==============================================================================
 EDAPI: Elite Dangerous API Tool
-Requires Python 3.4 and TradeDangerous.
+Requires Python 3.4, requests, and TradeDangerous.
 ==============================================================================
 Automates pulling your profile information from the mobile API, and populating
 TradeDangerous with station, market, and shipyard data.
