@@ -376,7 +376,8 @@ class EDAPI:
 
         # Read/create the cookie jar.
         if os.path.exists(self._cookiefile):
-            # Make an attempt at rate limiting requests to the API
+            # Make an attempt at rate limiting requests to the API.
+            # Please don't disable this.
             delta = time.time()-os.path.getmtime(self._cookiefile)
             if delta < 10:
                 sys.exit('You must wait at least 10 seconds between queries to the API. Try again in about {} seconds'.format
