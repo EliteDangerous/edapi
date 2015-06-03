@@ -18,6 +18,7 @@ from requests.utils import cookiejar_from_dict
 import sys
 import tempfile
 import textwrap
+import time
 import traceback
 
 __version_info__ = ('3', '1', '0')
@@ -374,12 +375,17 @@ class EDAPI:
         }
 
         # Read/create the cookie jar.
-        try:
-            if os.path.exists(self._cookiefile):
+        if os.path.exists(self._cookiefile):
+            # Make an attempt at rate limiting requests to the API
+            delta = time.time()-os.path.getmtime(self._cookiefile)
+            if delta < 10:
+                sys.exit('You must wait at least 10 seconds between queries to the API. Try again in about {} seconds'.format
+                         (int(10-delta)))
+            try:
                 with open(self._cookiefile, 'rb') as h:
                     self.opener.cookies = cookiejar_from_dict(pickle.load(h))
-        except:
-            print('Unable to read cookie file.')
+            except:
+                print('Unable to read cookie file.')
 
         else:
             with open(self._cookiefile, 'wb') as h:
