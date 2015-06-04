@@ -35,7 +35,8 @@ cat_ignore = [
 
 # TD has different names for these.
 cat_correct = {
-    'Narcotics': 'Legal Drugs'
+    'Narcotics': 'Legal Drugs',
+    'Slaves': 'Slavery',
 }
 
 # Commodities to ignore. Don't try to pass these to TD. This is mostly for
