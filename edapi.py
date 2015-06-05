@@ -21,6 +21,8 @@ import textwrap
 import time
 import traceback
 
+import eddn
+
 __version_info__ = ('3', '2', '0')
 __version__ = '.'.join(__version_info__)
 
@@ -201,6 +203,12 @@ def parse_args():
                         default=None,
                         help="Import API info from a JSON file instead of the\
                         API. Used mostly for debugging purposes.")
+
+    # EDDN
+    parser.add_argument("--eddn",
+                        action="store_true",
+                        default=False,
+                        help="Post prices to the EDDN.")
 
     # Export
     parser.add_argument("--export",
@@ -865,6 +873,7 @@ def Main():
     # Write out trade data
     header = False
     f.write("@ {}/{}\n".format(system, station).encode('UTF-8'))
+    eddn_market = []
     for commodity in api.profile['lastStarport']['commodities']:
         if commodity['categoryname'] in cat_ignore:
             continue
@@ -877,6 +886,19 @@ def Main():
 
         if commodity['name'] in comm_correct:
             commodity['name'] = comm_correct[commodity['name']]
+
+        # Populate EDDN
+        eddn_market.append(
+            {
+                "name": commodity['name'],
+                "buyPrice": int(commodity['buyPrice']),
+                "supply": int(commodity['stock']),
+                "supplyLevel": eddn.levels[int(commodity['stockBracket'])],
+                "sellPrice": int(commodity['sellPrice']),
+                "demand": int(commodity['demand']),
+                "demandLevel": eddn.levels[int(commodity['demandBracket'])]
+            }
+        )
 
         f.write(
             "\t+ {}\n".format(
@@ -960,6 +982,20 @@ def Main():
 
     # Ask TD to parse the system from the temp file.
     cache.importDataFromFile(tdb, tdenv, fpath)
+
+    # Post to EDDN
+    if args.eddn:
+        con = eddn.EDDN(
+            api.profile['commander']['name'],
+            'EDAPI',
+            __version__
+        )
+        con._debug = args.debug
+        con.publishCommodities(
+            system,
+            station,
+            eddn_market
+        )
 
     # Remove the temp file.
     fpath.unlink()
