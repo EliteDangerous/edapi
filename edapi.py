@@ -21,7 +21,7 @@ import textwrap
 import time
 import traceback
 
-__version_info__ = ('3', '1', '1')
+__version_info__ = ('3', '2', '0')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
