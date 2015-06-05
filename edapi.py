@@ -31,6 +31,7 @@ __version__ = '.'.join(__version_info__)
 # Categories to ignore. Drones end up here. No idea what they are.
 cat_ignore = [
     'NonMarketable',
+    'Salvage',
 ]
 
 # TD has different names for these.
@@ -74,7 +75,10 @@ ship_names = {
     'Anaconda': 'Anaconda',
     'Asp': 'Asp',
     'CobraMkIII': 'Cobra',
+    'DiamondBack': 'Diamondback Scout',
+    'DiamondBackXL': 'Diamondback Explorer',
     'Eagle': 'Eagle',
+    'Empire_Courier': 'Imperial Courier',
     'Empire_Fighter': 'Empire_Fighter',
     'Empire_Trader': 'Clipper',
     'Federation_Dropship': 'Dropship',
