@@ -54,7 +54,6 @@ ship_names = {
 # Categories to ignore. Drones end up here. No idea what they are.
 cat_ignore = [
     'NonMarketable',
-    'Salvage',
 ]
 
 # TD has different names for these.
