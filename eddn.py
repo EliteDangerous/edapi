@@ -11,9 +11,8 @@ import hashlib
 import json
 import random
 import requests
-from time import time
 
-# As of 1.3, ED reports four levels. 
+# As of 1.3, ED reports four levels.
 levels = (
     'Low',
     'Low',
@@ -21,10 +20,11 @@ levels = (
     'High',
 )
 
+
 class EDDN:
     _gateways = (
         'http://eddn-gateway.elite-markets.net:8080/upload/',
-#        'http://eddn-gateway.ed-td.space:8080/upload/',
+        # 'http://eddn-gateway.ed-td.space:8080/upload/',
     )
 
     _schemas = {
@@ -54,7 +54,7 @@ class EDDN:
     ):
         message = {}
 
-        message['$schemaRef'] = self._schemas[('test' if self._debug else 'production')]
+        message['$schemaRef'] = self._schemas[('test' if self._debug else 'production')]  # NOQA
 
         message['header'] = {
             'uploaderID': self.uploaderID,
@@ -77,7 +77,7 @@ class EDDN:
         url = random.choice(self._gateways)
 
         headers = {
-            'content-type' : 'application/json; charset=utf8'
+            'content-type': 'application/json; charset=utf8'
         }
 
         if self._debug:
@@ -91,6 +91,7 @@ class EDDN:
 
         r = requests.post(
             url,
+            headers=headers,
             data=json.dumps(
                 message,
                 ensure_ascii=False
