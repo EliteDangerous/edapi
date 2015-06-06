@@ -888,17 +888,18 @@ def Main():
             commodity['name'] = comm_correct[commodity['name']]
 
         # Populate EDDN
-        eddn_market.append(
-            {
-                "name": commodity['name'],
-                "buyPrice": int(commodity['buyPrice']),
-                "supply": int(commodity['stock']),
-                "supplyLevel": eddn.levels[int(commodity['stockBracket'])],
-                "sellPrice": int(commodity['sellPrice']),
-                "demand": int(commodity['demand']),
-                "demandLevel": eddn.levels[int(commodity['demandBracket'])]
-            }
-        )
+        if args.eddn:
+            eddn_market.append(
+                {
+                    "name": commodity['name'],
+                    "buyPrice": int(commodity['buyPrice']),
+                    "supply": int(commodity['stock']),
+                    "supplyLevel": eddn.levels[int(commodity['stockBracket'])],
+                    "sellPrice": int(commodity['sellPrice']),
+                    "demand": int(commodity['demand']),
+                    "demandLevel": eddn.levels[int(commodity['demandBracket'])]
+                }
+            )
 
         f.write(
             "\t+ {}\n".format(
@@ -983,8 +984,12 @@ def Main():
     # Ask TD to parse the system from the temp file.
     cache.importDataFromFile(tdb, tdenv, fpath)
 
+    # Remove the temp file.
+    fpath.unlink()
+
     # Post to EDDN
     if args.eddn:
+        print('Posting prices to EDDN...')
         con = eddn.EDDN(
             api.profile['commander']['name'],
             'EDAPI',
@@ -996,9 +1001,6 @@ def Main():
             station,
             eddn_market
         )
-
-    # Remove the temp file.
-    fpath.unlink()
 
     # No errors.
     return False

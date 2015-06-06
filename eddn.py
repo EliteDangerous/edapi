@@ -1,5 +1,5 @@
 """
-Python Implementation of the EDDN uploader:
+Python Implementation of the EDDN publisher:
 
     https://github.com/jamesremuscat/EDDN/blob/master/examples/PHP/EDDN.php
 
@@ -13,6 +13,7 @@ import random
 import requests
 from time import time
 
+# As of 1.3, ED reports four levels. 
 levels = (
     'Low',
     'Low',
@@ -74,14 +75,27 @@ class EDDN:
         }
 
         url = random.choice(self._gateways)
-        headers = { 'content-type' : 'application/json; charset=utf8' }
 
-        r = requests.post(url, data=json.dumps(
-            message,
-            ensure_ascii=False).encode('utf8'),
+        headers = {
+            'content-type' : 'application/json; charset=utf8'
+        }
+
+        if self._debug:
+            print(
+                json.dumps(
+                    message,
+                    sort_keys=True,
+                    indent=4
+                )
+            )
+
+        r = requests.post(
+            url,
+            data=json.dumps(
+                message,
+                ensure_ascii=False
+            ).encode('utf8'),
             verify=True
         )
+
         r.raise_for_status()
-
-        print(json.dumps(message,ensure_ascii=False).encode('utf8'))
-
