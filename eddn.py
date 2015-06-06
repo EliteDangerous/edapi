@@ -24,7 +24,7 @@ levels = (
 class EDDN:
     _gateways = (
         'http://eddn-gateway.elite-markets.net:8080/upload/',
-        'http://eddn-gateway.ed-td.space:8080/upload/',
+#        'http://eddn-gateway.ed-td.space:8080/upload/',
     )
 
     _schemas = {
