@@ -6,7 +6,7 @@ Python Implementation of the EDDN publisher:
 Only supports schema v2
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import json
 import random
@@ -65,7 +65,7 @@ class EDDN:
         if timestamp:
             timestamp = datetime.fromtimestamp(timestamp).isoformat()
         else:
-            timestamp = datetime.fromtimestamp(time()).isoformat()
+            timestamp = datetime.now(timezone.utc).astimezone().isoformat()
 
         message['message'] = {
             'systemName': systemName,
