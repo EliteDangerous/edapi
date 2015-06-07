@@ -12,14 +12,6 @@ import json
 import random
 import requests
 
-# As of 1.3, ED reports four levels.
-levels = (
-    'Low',
-    'Low',
-    'Med',
-    'High',
-)
-
 
 class EDDN:
     _gateways = (
@@ -33,6 +25,14 @@ class EDDN:
     }
 
     _debug = True
+
+    # As of 1.3, ED reports four levels.
+    _levels = (
+        'Low',
+        'Low',
+        'Med',
+        'High',
+    )
 
     def __init__(
         self,

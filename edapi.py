@@ -18,7 +18,6 @@ from requests.utils import cookiejar_from_dict
 import sys
 import tempfile
 import textwrap
-import time
 import traceback
 
 import eddn
@@ -379,13 +378,6 @@ class EDAPI:
 
         # Read/create the cookie jar.
         if os.path.exists(self._cookiefile):
-            # Make an attempt at rate limiting requests to the API.
-            # Please don't disable this.
-            delta = time.time()-os.path.getmtime(self._cookiefile)
-            if delta < 10:
-                sys.exit('You must wait at least 10 seconds between queries ' +
-                         'to the API. Try again in about {} seconds'.format
-                         (int(10-delta)))
             try:
                 with open(self._cookiefile, 'rb') as h:
                     self.opener.cookies = cookiejar_from_dict(pickle.load(h))
@@ -894,10 +886,10 @@ def Main():
                     "name": commodity['name'],
                     "buyPrice": int(commodity['buyPrice']),
                     "supply": int(commodity['stock']),
-                    "supplyLevel": eddn.levels[int(commodity['stockBracket'])],
+                    "supplyLevel": eddn.EDDN._levels[int(commodity['stockBracket'])],  # NOQA
                     "sellPrice": int(commodity['sellPrice']),
                     "demand": int(commodity['demand']),
-                    "demandLevel": eddn.levels[int(commodity['demandBracket'])]
+                    "demandLevel": eddn.EDDN._levels[int(commodity['demandBracket'])]  # NOQA
                 }
             )
 
