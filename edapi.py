@@ -232,8 +232,8 @@ def parse_args():
     # tdpath
     parser.add_argument("--tdpath",
                         default=".",
-                        help="Path to the TradeDangerous root. This is used to\
-                        locate the TradeDangerous python modules and data/\
+                        help="Path to the Trade Dangerous root. This is used to\
+                        locate the Trade Dangerous python modules and data/\
                         directory.")
 
     # colors
@@ -634,11 +634,11 @@ def Main():
             )
 
     # Setup TD
-    print('Initializing TradeDangerous...')
+    print('Initializing Trade Dangerous...')
     try:
         import tradeenv
     except:
-        sys.exit('Can\'t find TradeDangerous. Do you need --tdpath?')
+        sys.exit('Can\'t find Trade Dangerous. Do you need --tdpath?')
     tdenv = tradeenv.TradeEnv()
     if args.tdpath is not '.':
         tdenv.dataDir = args.tdpath+'/data'
@@ -968,7 +968,7 @@ def Main():
     f.close()
 
     # All went well. Try the import.
-    print('Importing into TradeDangerous...')
+    print('Importing into Trade Dangerous...')
 
     # TD likes to use Path objects
     fpath = Path(f.name)

@@ -1,16 +1,16 @@
 ==============================================================================
 EDAPI: Elite Dangerous API Tool
-Requires Python 3.4, requests, and TradeDangerous.
+Requires Python 3.4, requests, and Trade Dangerous.
 ==============================================================================
 Automates pulling your profile information from the mobile API, and populating
-TradeDangerous with station, market, and shipyard data.
+Trade Dangerous with station, market, and shipyard data.
 
 ==============================================================================
 == Command line usage:
 ==============================================================================
 
-Either place edapi.py in the TradeDangerous root, or tell it where to
-find TradeDangerous with the --tdpath option.
+Either place edapi.py in the Trade Dangerous root, or tell it where to
+find Trade Dangerous with the --tdpath option.
 
 usage: edapi.py [-h] [--version] [--debug] [--import FILE] [--eddn]
                 [--export FILE] [--vars] [--basename BASENAME]
@@ -32,8 +32,8 @@ optional arguments:
                         system/station. (default: False)
   --basename BASENAME   Base file name. This is used to construct the cookie
                         and vars file names. (default: edapi)
-  --tdpath TDPATH       Path to the TradeDangerous root. This is used to
-                        locate the TradeDangerous python modules and data/
+  --tdpath TDPATH       Path to the Trade Dangerous root. This is used to
+                        locate the Trade Dangerous python modules and data/
                         directory. (default: .)
   --no-color            Disable the use of ansi colors in output. (default:
                         False)
@@ -44,11 +44,15 @@ optional arguments:
                         below the specificed key. (default: False)
 
 ==============================================================================
-== TradeDangerous plugin usage:
+== Trade Dangerous plugin usage:
 ==============================================================================
 
-Copy edapi_plug.py to the plugins directory in TradeDangerous. Use the
+Copy edapi_plug.py to the plugins directory in Trade Dangerous. Use the
 import command to connect to the API and import price and shipyard
 data.
 
-./trade.py import --plug edapi
+./trade.py import -P edapi
+
+You can also import to eddn with the plugin:
+
+./trade.py import -P edapi -O eddn
