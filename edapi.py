@@ -593,12 +593,12 @@ def Main():
             maxGT = max([r[rankType][x]['gt'] for x in r[rankType].keys()])
             maxTS = max([r[rankType][x]['ts'] for x in r[rankType].keys()])
         except:
-            maxGT = 'Unkown'
+            maxGT = 'Unknown'
             maxTS = 0
         if maxTS:
             maxTS = datetime.fromtimestamp(maxTS).isoformat()
         else:
-            maxTS = 'Unkown'
+            maxTS = 'Unknown'
         print("| {:>10} | {:>16} | {:1} | {:>13} | {:19} |".format(
             rankType,
             rankName,
