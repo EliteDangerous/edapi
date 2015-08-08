@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '2', '0')
+__version_info__ = ('3', '2', '1')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -572,14 +572,12 @@ def Main():
 
     # Print the commander profile
     print('Commander:', c.OKGREEN+api.profile['commander']['name']+c.ENDC)
-    print('Game Time: {:>12}'.format(convertSecs(api.profile['stats']['game_time'])))  # NOQA
     print('Credits  : {:>12,d}'.format(api.profile['commander']['credits']))
     print('Debt     : {:>12,d}'.format(api.profile['commander']['debt']))
     print('Capacity : {} tons'.format(api.profile['ship']['cargo']['capacity']))  # NOQA
-    print("+------------+------------------+---+---------------+---------------------+")  # NOQA
-    print("|  Rank Type |        Rank Name | # |     Game Time | Timestamp           |")  # NOQA
-    print("+------------+------------------+---+---------------+---------------------+")  # NOQA
-    r = api.profile['stats']['ranks']
+    print("+------------+------------------+---+")  # NOQA
+    print("|  Rank Type |        Rank Name | # |")  # NOQA
+    print("+------------+------------------+---+")  # NOQA
     for rankType in sorted(api.profile['commander']['rank']):
         rank = api.profile['commander']['rank'][rankType]
         if rankType in rank_names:
@@ -589,25 +587,13 @@ def Main():
                 rankName = "Rank "+str(rank)
         else:
             rankName = ''
-        try:
-            maxGT = max([r[rankType][x]['gt'] for x in r[rankType].keys()])
-            maxTS = max([r[rankType][x]['ts'] for x in r[rankType].keys()])
-        except:
-            maxGT = 'Unknown'
-            maxTS = 0
-        if maxTS:
-            maxTS = datetime.fromtimestamp(maxTS).isoformat()
-        else:
-            maxTS = 'Unknown'
-        print("| {:>10} | {:>16} | {:1} | {:>13} | {:19} |".format(
+        print("| {:>10} | {:>16} | {:1} |".format(
             rankType,
             rankName,
             rank,
-            convertSecs(maxGT),
-            maxTS
             )
         )
-    print("+------------+------------------+---+---------------+---------------------+")  # NOQA
+    print("+------------+------------------+---+")  # NOQA
     print('Docked:', api.profile['commander']['docked'])
 
     system = api.profile['lastSystem']['name']
@@ -902,23 +888,31 @@ def Main():
             ).encode('UTF-8')
         )
 
+        def commodity_int(key):
+            try:
+                commodity[key] = int(commodity[key])
+            except (ValueError, KeyError):
+                commodity[key] = 0
+
+        commodity_int('stock')
+        commodity_int('demand')
+        commodity_int('demandBracket')
+        commodity_int('stockBracket')
+
         # If stock is zero, list it as unavailable.
-        if commodity['stock'] == 0:
+        if not commodity['stock']:
             commodity['stock'] = '-'
         else:
-            demand = bracket_levels[int(commodity['stockBracket'])]
-            commodity['stock'] = str(int(commodity['stock']))+demand
+            demand = bracket_levels[commodity['stockBracket']]
+            commodity['stock'] = str(commodity['stock'])+demand
 
         # If demand is zero or demand bracket is zero, zero the sell price.
-        if (
-            commodity['demand'] == 0 or
-            commodity['demandBracket'] == 0
-        ):
+        if not (commodity['demand'] and commodity['demandBracket']):
             commodity['demand'] = '?'
             commodity['sellPrice'] = 0
         else:
-            demand = bracket_levels[int(commodity['demandBracket'])]
-            commodity['demand'] = str(int(commodity['demand']))+demand
+            demand = bracket_levels[commodity['demandBracket']]
+            commodity['demand'] = str(commodity['demand'])+demand
 
         # Print price differences
         oldCom = oldPrices.get(commodity['name'], (0, 0))
