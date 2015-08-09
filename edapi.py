@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '2', '1')
+__version_info__ = ('3', '3', '0')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -92,6 +92,31 @@ ship_names = {
     'Type6': 'Type 6',
     'Type7': 'Type 7',
     'Type9': 'Type 9',
+    'Viper': 'Viper',
+    'Vulture': 'Vulture',
+}
+
+eddn_ship_names = {
+    'Adder': 'Adder',
+    'Anaconda': 'Anaconda',
+    'Asp': 'Asp',
+    'CobraMkIII': 'Cobra Mk III',
+    'DiamondBack': 'DiamondBack Scout',
+    'DiamondBackXL': 'DiamondBack Explorer',
+    'Eagle': 'Eagle',
+    'Empire_Courier': 'Imperial Courier',
+    'Empire_Fighter': 'Empire_Fighter',
+    'Empire_Trader': 'Imperial Clipper',
+    'Federation_Dropship': 'Federal Dropship',
+    'Federation_Fighter': 'Federation_Fighter',
+    'FerDeLance': 'Fer-de-Lance',
+    'Hauler': 'Hauler',
+    'Orca': 'Orca',
+    'Python': 'Python',
+    'SideWinder': 'Sidewinder',
+    'Type6': 'Type-6 Transporter',
+    'Type7': 'Type-7 Transporter',
+    'Type9': 'Type-9 Heavy',
     'Viper': 'Viper',
     'Vulture': 'Vulture',
 }
@@ -779,6 +804,7 @@ def Main():
                 tdenv.NOTE("{} updated.", csvPath)
 
     # If a shipyard exists, update the ship vendor csv
+    eddn_ships = []
     if 'ships' in api.profile['lastStarport']:
         print(c.OKBLUE+'Updating shipyard vendor...'+c.ENDC)
         ships = list(
@@ -789,6 +815,7 @@ def Main():
         db = tdb.getDB()
         for ship in ships:
             ship_lookup = tdb.lookupShip(ship_names[ship])
+            eddn_ships.append(eddn_ship_names[ship])
             db.execute("""
                        REPLACE INTO ShipVendor
                        (ship_id, station_id)
@@ -990,6 +1017,13 @@ def Main():
             station,
             eddn_market
         )
+        if (eddn_ships):
+            print('Posting shipyard to EDDN...')
+            con.publishShipyard(
+                system,
+                station,
+                eddn_ships
+            )
 
     # No errors.
     return False

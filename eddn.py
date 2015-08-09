@@ -19,9 +19,14 @@ class EDDN:
         # 'http://eddn-gateway.ed-td.space:8080/upload/',
     )
 
-    _schemas = {
+    _market_schemas = {
         'production': 'http://schemas.elite-markets.net/eddn/commodity/2',
         'test': 'http://schemas.elite-markets.net/eddn/commodity/2/test',
+    }
+
+    _shipyard_schemas = {
+        'production': 'http://schemas.elite-markets.net/eddn/shipyard/1',
+        'test': 'http://schemas.elite-markets.net/eddn/shipyard/1/test',
     }
 
     _debug = True
@@ -45,34 +50,17 @@ class EDDN:
         self.softwareName = softwareName
         self.softwareVersion = softwareVersion
 
-    def publishCommodities(
+    def postMessage(
         self,
-        systemName,
-        stationName,
-        commodities,
+        message,
         timestamp=0
     ):
-        message = {}
-
-        message['$schemaRef'] = self._schemas[('test' if self._debug else 'production')]  # NOQA
-
-        message['header'] = {
-            'uploaderID': self.uploaderID,
-            'softwareName': self.softwareName,
-            'softwareVersion': self.softwareVersion
-        }
-
         if timestamp:
             timestamp = datetime.fromtimestamp(timestamp).isoformat()
         else:
             timestamp = datetime.now(timezone.utc).astimezone().isoformat()
 
-        message['message'] = {
-            'systemName': systemName,
-            'stationName': stationName,
-            'timestamp': timestamp,
-            'commodities': commodities,
-        }
+        message['message']['timestamp'] = timestamp
 
         url = random.choice(self._gateways)
 
@@ -100,3 +88,53 @@ class EDDN:
         )
 
         r.raise_for_status()
+
+    def publishCommodities(
+        self,
+        systemName,
+        stationName,
+        commodities,
+        timestamp=0
+    ):
+        message = {}
+
+        message['$schemaRef'] = self._market_schemas[('test' if self._debug else 'production')]  # NOQA
+
+        message['header'] = {
+            'uploaderID': self.uploaderID,
+            'softwareName': self.softwareName,
+            'softwareVersion': self.softwareVersion
+        }
+
+        message['message'] = {
+            'systemName': systemName,
+            'stationName': stationName,
+            'commodities': commodities,
+        }
+
+        self.postMessage(message, timestamp)
+
+    def publishShipyard(
+        self,
+        systemName,
+        stationName,
+        ships,
+        timestamp=0
+    ):
+        message = {}
+
+        message['$schemaRef'] = self._shipyard_schemas[('test' if self._debug else 'production')]  # NOQA
+
+        message['header'] = {
+            'uploaderID': self.uploaderID,
+            'softwareName': self.softwareName,
+            'softwareVersion': self.softwareVersion
+        }
+
+        message['message'] = {
+            'systemName': systemName,
+            'stationName': stationName,
+            'ships': ships,
+        }
+
+        self.postMessage(message, timestamp)
