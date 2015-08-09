@@ -4,7 +4,6 @@
 # ----------------------------------------------------------------
 
 import argparse
-from datetime import datetime
 import getpass
 import json
 import os
@@ -22,7 +21,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '3', '0')
+__version_info__ = ('3', '3', '1')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -235,7 +234,7 @@ def parse_args():
     parser.add_argument("--eddn",
                         action="store_true",
                         default=False,
-                        help="Post prices to the EDDN.")
+                        help="Post prices and shipyards to the EDDN.")
 
     # Export
     parser.add_argument("--export",
