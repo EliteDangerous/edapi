@@ -10,10 +10,9 @@ to the EDDN.
 == Command line usage:
 ==============================================================================
 
-usage: edapi.py [-h] [--version] [--debug] [--import FILE] [--eddn]
-                [--export FILE] [--vars] [--basename BASENAME]
-                [--tdpath TDPATH] [--no-color] [--keys [KEYS [KEYS ...]]]
-                [--tree]
+usage: edapi.py [-h] [--version] [--debug] [--tdpath TDPATH] [--no-color]
+                [--basename BASENAME] [--vars] [--ships] [--import FILE]
+                [--export FILE] [--eddn] [--keys [KEYS [KEYS ...]]] [--tree]
 
 EDAPI: Elite Dangerous API Tool
 
@@ -21,20 +20,22 @@ optional arguments:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
   --debug               Output additional debug info. (default: False)
-  --import FILE         Import API info from a JSON file instead of the API.
-                        Used mostly for debugging purposes. (default: None)
-  --eddn                Post prices and shipyards to the EDDN. (default:
-                        False)
-  --export FILE         Export API response to a file as JSON. (default: None)
-  --vars                Output a file that sets environment variables for
-                        current cargo capacity, credits, and current
-                        system/station. (default: False)
-  --basename BASENAME   Base file name. This is used to construct the cookie
-                        and vars file names. (default: edapi)
   --tdpath TDPATH       Path to the Trade Dangerous root. This is used to
                         locate the Trade Dangerous python modules and data/
                         directory. (default: .)
   --no-color            Disable the use of ansi colors in output. (default:
+                        False)
+  --basename BASENAME   Base file name. This is used to construct the cookie
+                        and vars file names. (default: edapi)
+  --vars                Output a file that sets environment variables for
+                        current cargo capacity, credits, and current
+                        system/station. (default: False)
+  --ships               Write shipyards to the TD ShipVendor.csv. (default:
+                        False)
+  --import FILE         Import API info from a JSON file instead of the API.
+                        Used mostly for debugging purposes. (default: None)
+  --export FILE         Export API response to a file as JSON. (default: None)
+  --eddn                Post prices and shipyards to the EDDN. (default:
                         False)
   --keys [KEYS [KEYS ...]]
                         Instead of normal import, display raw API data given a

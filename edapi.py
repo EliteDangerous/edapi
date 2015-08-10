@@ -21,7 +21,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '3', '1')
+__version_info__ = ('3', '3', '2')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -222,40 +222,6 @@ def parse_args():
                         default=False,
                         help="Output additional debug info.")
 
-    # JSON
-    parser.add_argument("--import",
-                        metavar="FILE",
-                        dest="json_file",
-                        default=None,
-                        help="Import API info from a JSON file instead of the\
-                        API. Used mostly for debugging purposes.")
-
-    # EDDN
-    parser.add_argument("--eddn",
-                        action="store_true",
-                        default=False,
-                        help="Post prices and shipyards to the EDDN.")
-
-    # Export
-    parser.add_argument("--export",
-                        metavar="FILE",
-                        default=None,
-                        help="Export API response to a file as JSON.")
-
-    # vars file
-    parser.add_argument("--vars",
-                        action="store_true",
-                        default=False,
-                        help="Output a file that sets environment variables\
-                        for current cargo capacity, credits, and current\
-                        system/station.")
-
-    # Base file name.
-    parser.add_argument("--basename",
-                        default="edapi",
-                        help='Base file name. This is used to construct the\
-                        cookie and vars file names.')
-
     # tdpath
     parser.add_argument("--tdpath",
                         default=".",
@@ -270,6 +236,46 @@ def parse_args():
                         action="store_true",
                         default=default,
                         help="Disable the use of ansi colors in output.")
+
+    # Base file name.
+    parser.add_argument("--basename",
+                        default="edapi",
+                        help='Base file name. This is used to construct the\
+                        cookie and vars file names.')
+
+    # vars file
+    parser.add_argument("--vars",
+                        action="store_true",
+                        default=False,
+                        help="Output a file that sets environment variables\
+                        for current cargo capacity, credits, and current\
+                        system/station.")
+
+    # vars file
+    parser.add_argument("--ships",
+                        action="store_true",
+                        default=False,
+                        help="Write shipyards to the TD ShipVendor.csv.")
+
+    # Import from JSON
+    parser.add_argument("--import",
+                        metavar="FILE",
+                        dest="json_file",
+                        default=None,
+                        help="Import API info from a JSON file instead of the\
+                        API. Used mostly for debugging purposes.")
+
+    # Export to JSON
+    parser.add_argument("--export",
+                        metavar="FILE",
+                        default=None,
+                        help="Export API response to a file as JSON.")
+
+    # EDDN
+    parser.add_argument("--eddn",
+                        action="store_true",
+                        default=False,
+                        help="Post prices and shipyards to the EDDN.")
 
     # keys
     parser.add_argument("--keys",
@@ -805,31 +811,36 @@ def Main():
     # If a shipyard exists, update the ship vendor csv
     eddn_ships = []
     if 'ships' in api.profile['lastStarport']:
-        print(c.OKBLUE+'Updating shipyard vendor...'+c.ENDC)
+        print(c.OKGREEN+'Found a shipyard at this station.'+c.ENDC)
         ships = list(
             api.profile['lastStarport']['ships']['shipyard_list'].keys()
         )
         for ship in api.profile['lastStarport']['ships']['unavailable_list']:
             ships.append(ship['name'])
-        db = tdb.getDB()
+
         for ship in ships:
-            ship_lookup = tdb.lookupShip(ship_names[ship])
             eddn_ships.append(eddn_ship_names[ship])
-            db.execute("""
-                       REPLACE INTO ShipVendor
-                       (ship_id, station_id)
-                       VALUES
-                       (?, ?)
-                       """,
-                       (ship_lookup.ID, station_lookup.ID))
-            db.commit()
-        tdenv.NOTE("Updated {} ships in {} shipyard.", len(ships), station)
-        lines, csvPath = csvexport.exportTableToFile(
-            tdb,
-            tdenv,
-            "ShipVendor",
-        )
-        tdenv.NOTE("{} updated.", csvPath)
+
+        if args.ships:
+            print(c.OKBLUE+'Updating ShipVendor.csv...'+c.ENDC)
+            db = tdb.getDB()
+            for ship in ships:
+                ship_lookup = tdb.lookupShip(ship_names[ship])
+                db.execute("""
+                           REPLACE INTO ShipVendor
+                           (ship_id, station_id)
+                           VALUES
+                           (?, ?)
+                           """,
+                           (ship_lookup.ID, station_lookup.ID))
+                db.commit()
+            tdenv.NOTE("Updated {} ships in {} shipyard.", len(ships), station)
+            lines, csvPath = csvexport.exportTableToFile(
+                tdb,
+                tdenv,
+                "ShipVendor",
+            )
+            tdenv.NOTE("{} updated.", csvPath)
 
     # Some sanity checking on the market
     if 'commodities' not in api.profile['lastStarport']:
