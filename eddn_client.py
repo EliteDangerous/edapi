@@ -47,7 +47,7 @@ def parse_args():
     # relay
     parser.add_argument("--relay",
                         default="tcp://eddn-relay.elite-markets.net:9500",
-                        help='EDDN replay to connect to.')
+                        help='EDDN relay to connect to.')
     # timeout
     parser.add_argument("--timeout",
                         default=600000,
@@ -61,7 +61,7 @@ def parse_args():
                             "EDAPI Trade Dangerous Plugin",
                         ],
                         nargs='+',
-                        help="A list of whitelisted software. Use \"all\" to\
+                        help="A list of white listed software. Use \"all\" to\
                         see all messages.")
 
     # Parse the command line.
@@ -130,7 +130,7 @@ def Main():
     subscriber.setsockopt(zmq.SUBSCRIBE, b"")
     subscriber.setsockopt(zmq.RCVTIMEO, args.timeout)
 
-   # Do this forever.
+    # Do this forever.
     while True:
         try:
             # Connect.
