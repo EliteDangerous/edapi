@@ -1049,7 +1049,6 @@ if __name__ == "__main__":
     try:
         # Parse any command line arguments.
         args = parse_args()
-        test = args
 
         # Command line overrides
         if args.debug is True:
