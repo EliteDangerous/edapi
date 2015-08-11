@@ -17,6 +17,7 @@ from requests.utils import cookiejar_from_dict
 import sys
 import tempfile
 import textwrap
+import time
 import traceback
 
 import eddn
@@ -535,6 +536,10 @@ class EDAPI:
             values = {}
             values['code'] = input("Code:")
             response = self._getBasicURI('user/confirm', values=values)
+
+        # Sometimes the API is slow to set a session. Wait a bit before
+        # continuing.
+        time.sleep(2)
 
 
 # ----------------------------------------------------------------
