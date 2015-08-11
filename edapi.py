@@ -21,7 +21,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '3', '3')
+__version_info__ = ('3', '3', '4')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -959,7 +959,8 @@ def Main():
         if (diffSell != 0 or diffBuy != 0):
             if header is False:
                 header = True
-                print("{:>25} {:>13} {:>13}".format(
+                print("Price fluctuations:")
+                print("{:->25}-+{:->14}---+{:->14}---+".format(
                     'Commodity',
                     'Sell Price',
                     'Buy Price'
@@ -977,15 +978,17 @@ def Main():
             else:
                 buyColor = c.ENDC
             if args.nocolor:
-                s = "{:>25} {:>5}{:<8} {:>5}{:<8}"
+                s = "{:>25} | {:>5}{:<8} {} | {:>5}{:<8} {} |"
             else:
-                s = "{:>25} {:>5}{:<17} {:>5}{:<17}"
+                s = "{:>25} | {:>5}{:<18} {} | {:>5}{:<18} {} |"
             print(s.format(
                 commodity['name'],
                 commodity['sellPrice'],
                 '('+sellColor+"{:+d}".format(diffSell)+c.ENDC+')',
+                bracket_levels[commodity['demandBracket']],
                 commodity['buyPrice'],
-                '('+buyColor+"{:+d}".format(diffBuy)+c.ENDC+')'
+                '('+buyColor+"{:+d}".format(diffBuy)+c.ENDC+')',
+                bracket_levels[commodity['stockBracket']],
                 )
             )
 
@@ -999,6 +1002,12 @@ def Main():
             ).encode('UTF-8')
         )
     f.close()
+    if header is True:
+        print("{:->25}-+{:->14}---+{:->14}---+".format(
+            '',
+            '',
+            ''
+        ))
 
     # All went well. Try the import.
     print('Importing into Trade Dangerous...')
