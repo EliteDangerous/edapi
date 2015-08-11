@@ -21,7 +21,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '3', '2')
+__version_info__ = ('3', '3', '3')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -943,10 +943,9 @@ def Main():
             demand = bracket_levels[commodity['stockBracket']]
             commodity['stock'] = str(commodity['stock'])+demand
 
-        # If demand is zero or demand bracket is zero, zero the sell price.
+        # If demand is zero, list as unknown.
         if not (commodity['demand'] and commodity['demandBracket']):
             commodity['demand'] = '?'
-            commodity['sellPrice'] = 0
         else:
             demand = bracket_levels[commodity['demandBracket']]
             commodity['demand'] = str(commodity['demand'])+demand
