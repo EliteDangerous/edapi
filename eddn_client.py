@@ -160,7 +160,12 @@ def Main():
                     schema = allowed_schemas[message['$schemaRef']]
                 else:
                     schema += ': ' + message['$schemaRef']
-                echoLog('Received ' + schema)
+                echoLog(
+                    'Received ' + schema +
+                    ' ' + message['header']['softwareName'] +
+                    ' / ' + message['header']['softwareVersion'] +
+                    ' (' + message['header']['uploaderID'][:6] + ')'
+                )
 
                 # Check if the software is white listed.
                 if (
