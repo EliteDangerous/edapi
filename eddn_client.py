@@ -13,7 +13,7 @@ import traceback
 import zlib
 import zmq
 
-__version_info__ = ('3', '3', '4')
+__version_info__ = ('3', '4', '0')
 __version__ = '.'.join(__version_info__)
 
 
@@ -101,6 +101,7 @@ def Main():
     allowed_schemas = {
         'http://schemas.elite-markets.net/eddn/commodity/2': 'commodity-v2',
         'http://schemas.elite-markets.net/eddn/shipyard/1': 'shipyard-v1',
+        'http://schemas.elite-markets.net/eddn/outfitting/1': 'outfitting-v1',
     }
 
     # If debug, only listen for test type messages.
@@ -160,11 +161,13 @@ def Main():
                     schema = allowed_schemas[message['$schemaRef']]
                 else:
                     schema += ': ' + message['$schemaRef']
+                uploaderID = message['header']['uploaderID']
+                uploaderID = uploaderID[:16]+'...' if len(uploaderID)>16 else uploaderID
                 echoLog(
                     'Received ' + schema +
                     ' ' + message['header']['softwareName'] +
                     ' / ' + message['header']['softwareVersion'] +
-                    ' (' + message['header']['uploaderID'][:6] + ')'
+                    ' (' + uploaderID + ')'
                 )
 
                 # Check if the software is white listed.
@@ -195,13 +198,13 @@ def Main():
                         echoLog(
                             '\t\t\t\t- Supply: ' +
                             str(com['supply']) +
-                            ' (' + com['supplyLevel'] + ')'
+                            ' (' + com.get('supplyLevel', 'N/A') + ')'
                         )
                         echoLog('\t\t\t\t- Sell Price: ' + str(com['sellPrice']))  # NOQA
                         echoLog(
                             '\t\t\t\t- Demand: ' +
                             str(com['demand']) +
-                            ' (' + com['demandLevel'] + ')'
+                            ' (' + com.get('demandLevel', 'N/A') + ')'
                         )
 
                     echoLog('')
@@ -211,6 +214,14 @@ def Main():
                 if schema == 'shipyard-v1':
                     for ship in message['message']['ships']:
                         echoLog('\t\t\t- Ship: ' + ship)
+
+                    echoLog('')
+                    echoLog('')
+
+                # Handle outfitting v1
+                if schema == 'outfitting-v1':
+                    for module in message['message']['modules']:
+                        echoLog('\t\t\t- Module: ' + module['name'])
 
                     echoLog('')
                     echoLog('')

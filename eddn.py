@@ -2,8 +2,6 @@
 Python Implementation of the EDDN publisher:
 
     https://github.com/jamesremuscat/EDDN/blob/master/examples/PHP/EDDN.php
-
-Only supports schema v2
 """
 
 from datetime import datetime, timezone
@@ -27,6 +25,11 @@ class EDDN:
     _shipyard_schemas = {
         'production': 'http://schemas.elite-markets.net/eddn/shipyard/1',
         'test': 'http://schemas.elite-markets.net/eddn/shipyard/1/test',
+    }
+
+    _outfitting_schemas = {
+        'production': 'http://schemas.elite-markets.net/eddn/outfitting/1',
+        'test': 'http://schemas.elite-markets.net/eddn/outfitting/1/test',
     }
 
     _debug = True
@@ -135,6 +138,31 @@ class EDDN:
             'systemName': systemName,
             'stationName': stationName,
             'ships': ships,
+        }
+
+        self.postMessage(message, timestamp)
+
+    def publishOutfitting(
+        self,
+        systemName,
+        stationName,
+        modules,
+        timestamp=0
+    ):
+        message = {}
+
+        message['$schemaRef'] = self._outfitting_schemas[('test' if self._debug else 'production')]  # NOQA
+
+        message['header'] = {
+            'uploaderID': self.uploaderID,
+            'softwareName': self.softwareName,
+            'softwareVersion': self.softwareVersion
+        }
+
+        message['message'] = {
+            'systemName': systemName,
+            'stationName': stationName,
+            'modules': modules,
         }
 
         self.postMessage(message, timestamp)

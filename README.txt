@@ -35,8 +35,8 @@ optional arguments:
   --import FILE         Import API info from a JSON file instead of the API.
                         Used mostly for debugging purposes. (default: None)
   --export FILE         Export API response to a file as JSON. (default: None)
-  --eddn                Post prices and shipyards to the EDDN. (default:
-                        False)
+  --eddn                Post price, shipyards, and outfitting to the EDDN.
+                        (default: False)
   --keys [KEYS [KEYS ...]]
                         Instead of normal import, display raw API data given a
                         set of dictionary keys. (default: None)
@@ -56,6 +56,14 @@ data.
 You can also import to EDDN with the plugin:
 
 ./trade.py import -P edapi -O eddn
+
+==============================================================================
+== Acknowledgements
+==============================================================================
+
+"Elite: Dangerous" is © 1984 - 2015 Frontier Developments Plc.
+Oliver "kfsone" Smith for his excellent tool, Trade Dangerous.
+Jonathan Harris for ED Market Connector and doing all the hard work on modules.
 
 ==============================================================================
 == License
