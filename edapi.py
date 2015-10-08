@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '3', '4')
+__version_info__ = ('3', '4', '0')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -80,10 +80,13 @@ ship_names = {
     'DiamondBackXL': 'Diamondback Explorer',
     'Eagle': 'Eagle',
     'Empire_Courier': 'Imperial Courier',
+    'Empire_Eagle': 'Imperial Eagle',
     'Empire_Fighter': 'Empire_Fighter',
     'Empire_Trader': 'Clipper',
     'Federation_Dropship': 'Dropship',
+    'Federation_Dropship_MkII': 'Federal Assault Ship',
     'Federation_Fighter': 'Federation_Fighter',
+    'Federation_Gunship': 'Federal Gunship',
     'FerDeLance': 'Fer-de-Lance',
     'Hauler': 'Hauler',
     'Orca': 'Orca',
@@ -105,10 +108,13 @@ eddn_ship_names = {
     'DiamondBackXL': 'DiamondBack Explorer',
     'Eagle': 'Eagle',
     'Empire_Courier': 'Imperial Courier',
+    'Empire_Eagle': 'Imperial Eagle',
     'Empire_Fighter': 'Empire_Fighter',
     'Empire_Trader': 'Imperial Clipper',
     'Federation_Dropship': 'Federal Dropship',
+    'Federation_Dropship_MkII': 'Federal Assault Ship',
     'Federation_Fighter': 'Federation_Fighter',
+    'Federation_Gunship': 'Federal Gunship',
     'FerDeLance': 'Fer-de-Lance',
     'Hauler': 'Hauler',
     'Orca': 'Orca',
@@ -467,11 +473,13 @@ class EDAPI:
         # login then ask again.
         response = self._getBasicURI(uri, values=values)
 
-        if str(response.url).endswith('user/login'):
+        #if str(response.url).endswith('user/login'):
+        if 'Password' in str(response.text):
             self._doLogin()
             response = self._getBasicURI(uri, values=values)
 
-        if str(response.url).endswith('user/login'):
+        #if str(response.url).endswith('user/login'):
+        if 'Password' in str(response.text):
             sys.exit(textwrap.fill(textwrap.dedent("""\
                 Something went terribly wrong. The login credentials
                 appear correct, but we are being denied access. Sometimes the
@@ -524,7 +532,7 @@ class EDAPI:
 
         # If we end up being redirected back to login,
         # the login failed.
-        if str(response.url).endswith('user/login'):
+        if 'Password' in str(response.text):
             sys.exit('Login failed.')
 
         # Check to see if we need to do the auth token dance.
@@ -537,10 +545,8 @@ class EDAPI:
             values['code'] = input("Code:")
             response = self._getBasicURI('user/confirm', values=values)
 
-        # Sometimes the API is slow to set a session. Wait a bit before
-        # continuing.
+        # The API is sometimes very slow to update sessions. Wait a bit...
         time.sleep(2)
-
 
 # ----------------------------------------------------------------
 # Main.
