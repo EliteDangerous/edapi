@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '5', '0')
+__version_info__ = ('3', '5', '1')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -205,7 +205,7 @@ rank_names = {
 
 modules = {
  128049250: {'category': 'standard',
-             'class': '2',
+             'class': '1',
              'name': 'Lightweight Alloy',
              'rating': 'I',
              'ship': 'Sidewinder'},
