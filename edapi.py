@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '5', '1')
+__version_info__ = ('3', '5', '2')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -3835,7 +3835,10 @@ def Main():
         lsFromStar = input(
             "Distance from star (enter for 0): "
         ) or 0
-        lsFromStar = int(lsFromStar)
+        try:
+            lsFromStar = int(float(lsFromStar))
+        except:
+            lsFromStar = 0
         blackMarket = input(
             "Black market present (Y, N or enter for ?): "
         ) or '?'
