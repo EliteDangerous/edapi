@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '5', '2')
+__version_info__ = ('3', '5', '3')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -3838,6 +3838,7 @@ def Main():
         try:
             lsFromStar = int(float(lsFromStar))
         except:
+            print("That doesn't seem to be a number. Defaulting to zero.")
             lsFromStar = 0
         blackMarket = input(
             "Black market present (Y, N or enter for ?): "
@@ -4203,7 +4204,7 @@ def Main():
             )
 
         eddn_modules = []
-        for key in api.profile['lastStarport'].get('modules'):
+        for key in api.profile['lastStarport'].get('modules', ()):
             key = int(key)
             if key in modules:
                 eddn_modules.append(modules[key])
