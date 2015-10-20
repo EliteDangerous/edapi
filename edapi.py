@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '5', '3')
+__version_info__ = ('3', '5', '4')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -4065,26 +4065,6 @@ def Main():
         if commodity['name'] in comm_correct:
             commodity['name'] = comm_correct[commodity['name']]
 
-        # Populate EDDN
-        if args.eddn:
-            eddn_market.append(
-                {
-                    "name": commodity['name'],
-                    "buyPrice": int(commodity['buyPrice']),
-                    "supply": int(commodity['stock']),
-                    "supplyLevel": eddn.EDDN._levels[int(commodity['stockBracket'])],  # NOQA
-                    "sellPrice": int(commodity['sellPrice']),
-                    "demand": int(commodity['demand']),
-                    "demandLevel": eddn.EDDN._levels[int(commodity['demandBracket'])]  # NOQA
-                }
-            )
-
-        f.write(
-            "\t+ {}\n".format(
-                commodity['categoryname']
-            ).encode('UTF-8')
-        )
-
         def commodity_int(key):
             try:
                 commodity[key] = int(commodity[key])
@@ -4095,6 +4075,28 @@ def Main():
         commodity_int('demand')
         commodity_int('demandBracket')
         commodity_int('stockBracket')
+        commodity_int('buyPrice')
+        commodity_int('sellPrice')
+
+        # Populate EDDN
+        if args.eddn:
+            eddn_market.append(
+                {
+                    "name": commodity['name'],
+                    "buyPrice": commodity['buyPrice'],
+                    "supply": commodity['stock'],
+                    "supplyLevel": eddn.EDDN._levels[commodity['stockBracket']],  # NOQA
+                    "sellPrice": commodity['sellPrice'],
+                    "demand": commodity['demand'],
+                    "demandLevel": eddn.EDDN._levels[commodity['demandBracket']]  # NOQA
+                }
+            )
+
+        f.write(
+            "\t+ {}\n".format(
+                commodity['categoryname']
+            ).encode('UTF-8')
+        )
 
         # If stock is zero, list it as unavailable.
         if not commodity['stock']:
