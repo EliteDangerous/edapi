@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '5', '4')
+__version_info__ = ('3', '5', '5')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -4099,7 +4099,8 @@ def Main():
         )
 
         # If stock is zero, list it as unavailable.
-        if not commodity['stock']:
+        # If the stockBracket is zero, ignore any stock.
+        if not commodity['stock'] or not commodity['stockBracket']:
             commodity['stock'] = '-'
         else:
             demand = bracket_levels[commodity['stockBracket']]
