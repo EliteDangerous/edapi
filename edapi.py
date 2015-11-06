@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '5', '6')
+__version_info__ = ('3', '5', '7')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -54,12 +54,20 @@ comm_correct = {
     'Auto Fabricators': 'Auto-Fabricators',
     'Basic Narcotics': 'Narcotics',
     'Bio Reducing Lichen': 'Bioreducing Lichen',
+    'Hafnium178': 'Hafnium 178',
     'Hazardous Environment Suits': 'H.E. Suits',
     'Heliostatic Furnaces': 'Microbial Furnaces',
     'Marine Supplies': 'Marine Equipment',
     'Non Lethal Weapons': 'Non-Lethal Weapons',
     'S A P8 Core Container': 'SAP 8 Core Container',
     'Terrain Enrichment Systems': 'Land Enrichment Systems',
+    'U S S Cargo Ancient Artefact': 'Ancient Artefact',
+    'U S S Cargo Experimental Chemicals': 'Experimental Chemicals',
+    'U S S Cargo Military Plans': 'Military Plans',
+    'U S S Cargo Prototype Tech': 'Prototype Tech',
+    'U S S Cargo Rebel Transmissions': 'Rebel Transmissions',
+    'U S S Cargo Technical Blueprints': 'Technical Blueprints',
+    'U S S Cargo Trade Data': 'Trade Data',
 }
 
 # ----------------------------------------------------------------
