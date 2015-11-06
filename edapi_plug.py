@@ -3374,7 +3374,7 @@ class EDAPI:
                 appear correct, but we are being denied access. Sometimes the
                 API is slow to update, so if you are authenticating for the
                 first time, wait a minute or so and try again. If this
-                persists try using --debug and report this.
+                persists try deleting your cookies file and starting over.
                 """)))
 
         return response
