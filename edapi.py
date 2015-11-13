@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '5', '7')
+__version_info__ = ('3', '5', '8')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -3866,16 +3866,20 @@ def Main():
         repair = input(
             "Repair present (Y, N or enter for ?): "
         ) or '?'
-        # This is unreliable, so default to unknown.
+        # This is unreliable, so ask the user.
         if 'commodities' in api.profile['lastStarport']:
             market = 'Y'
         else:
-            market = '?'
-        # This is also unreliable, so default to unknown.
+            market = input(
+                "Commodity market present (Y, N or enter for ?): "
+            ) or '?'
+        # This is also unreliable, so ask the user.
         if 'ships' in api.profile['lastStarport']:
             shipyard = 'Y'
         else:
-            shipyard = '?'
+            shipyard = input(
+                "Shipyard present (Y, N or enter for ?): "
+            ) or '?'
         system_lookup = tdb.lookupSystem(system)
         if tdb.addLocalStation(
             system=system_lookup,
@@ -3940,12 +3944,22 @@ def Main():
             repair = input(
                 "Update repair present (Y, N or enter for ?): "
             ) or '?'
-        # This is unreliable, so default to unchanged.
+        # This is unreliable, so ask the user if unknown.
         if 'commodities' in api.profile['lastStarport']:
             market = 'Y'
-        # This is also unreliable, so default to unchanged.
+        else:
+            if market is '?':
+                market = input(
+                    "Commodity market present (Y, N or enter for ?): "
+                ) or '?'
+        # This is also unreliable, so ask the user if unknown.
         if 'ships' in api.profile['lastStarport']:
             shipyard = 'Y'
+        else:
+            if shipyard is '?':
+                shipyard = input(
+                    "Shipyard present (Y, N or enter for ?): "
+                ) or '?'
         if (
             lsFromStar != station_lookup.lsFromStar or
             blackMarket != station_lookup.blackMarket or
