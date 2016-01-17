@@ -21,7 +21,7 @@ import sys
 import textwrap
 import time
 
-__version_info__ = ('3', '6', '0')
+__version_info__ = ('3', '6', '1')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -33,7 +33,7 @@ bracket_levels = ('-', 'L', 'M', 'H')
 # This translates what the API calls a ship into what TD calls a
 # ship.
 
-hip_names = {
+ship_names = {
     'Adder': 'Adder',
     'Anaconda': 'Anaconda',
     'Asp': 'Asp',
