@@ -39,17 +39,19 @@ ship_names = {
     'Asp': 'Asp',
     'Asp_Scout': 'Asp Scout',
     'CobraMkIII': 'Cobra',
-    'Cutter': 'Imperial Cutter',
     'CobraMkIV': 'Cobra MkIV',
+    'Cutter': 'Imperial Cutter',
     'DiamondBack': 'Diamondback Scout',
     'DiamondBackXL': 'Diamondback Explorer',
     'Eagle': 'Eagle',
     'Empire_Courier': 'Imperial Courier',
     'Empire_Eagle': 'Imperial Eagle',
+    'Empire_Fighter': 'Empire_Fighter', # why is this removed
     'Empire_Trader': 'Clipper',
     'Federation_Corvette': 'Federal Corvette',
     'Federation_Dropship': 'Dropship',
     'Federation_Dropship_MkII': 'Federal Assault Ship',
+    'Federation_Fighter': 'Federation_Fighter', # why is this removed
     'Federation_Gunship': 'Federal Gunship',
     'FerDeLance': 'Fer-de-Lance',
     'Hauler': 'Hauler',
@@ -65,6 +67,8 @@ ship_names = {
     'Vulture': 'Vulture',
 }
 
+# EDDN names ships as they appear in game.
+
 eddn_ship_names = {
     'Adder': 'Adder',
     'Anaconda': 'Anaconda',
@@ -78,10 +82,12 @@ eddn_ship_names = {
     'Eagle': 'Eagle',
     'Empire_Courier': 'Imperial Courier',
     'Empire_Eagle': 'Imperial Eagle',
+    'Empire_Fighter': 'Empire_Fighter', # why is this removed
     'Empire_Trader': 'Imperial Clipper',
     'Federation_Corvette': 'Federal Corvette',
     'Federation_Dropship': 'Federal Dropship',
     'Federation_Dropship_MkII': 'Federal Assault Ship',
+    'Federation_Fighter': 'Federation_Fighter', # why is this removed
     'Federation_Gunship': 'Federal Gunship',
     'FerDeLance': 'Fer-de-Lance',
     'Hauler': 'Hauler',
@@ -119,10 +125,11 @@ comm_correct = {
     'Hazardous Environment Suits': 'H.E. Suits',
     'Heliostatic Furnaces': 'Microbial Furnaces',
     'Marine Supplies': 'Marine Equipment',
-    'Meta Alloys': 'Meta-Alloys',
+    'META ALLOYS': 'Meta-Alloys',
+    'MU TOM IMAGER': 'Muon Imager',
     'Non Lethal Weapons': 'Non-Lethal Weapons',
     'S A P8 Core Container': 'SAP 8 Core Container',
-    'Skimer Components': 'Skimmer Components',
+    'SKIMER COMPONENTS': 'Skimmer Components',
     'Terrain Enrichment Systems': 'Land Enrichment Systems',
     'U S S Cargo Ancient Artefact': 'Ancient Artefact',
     'U S S Cargo Experimental Chemicals': 'Experimental Chemicals',
@@ -3901,9 +3908,6 @@ class ImportPlugin(plugins.ImportPluginBase):
             repair = input(
                 "Repair present (Y, N or enter for ?): "
             ) or '?'
-            planetary = input(
-                "Planetary station (Y, N or enter for ?): "
-            ) or '?'
             # This is unreliable, so ask the user.
             if 'commodities' in api.profile['lastStarport']:
                 market = 'Y'
@@ -3930,8 +3934,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                 outfitting=outfitting,
                 rearm=rearm,
                 refuel=refuel,
-                repair=repair,
-                planetary=planetary
+                repair=repair
             ):
                 lines, csvPath = csvexport.exportTableToFile(
                     tdb,
@@ -3952,7 +3955,6 @@ class ImportPlugin(plugins.ImportPluginBase):
             rearm = station_lookup.rearm
             refuel = station_lookup.refuel
             repair = station_lookup.repair
-            planetary = station_lookup.planetary
 
             if lsFromStar == 0:
                 lsFromStar = input(
@@ -3990,11 +3992,6 @@ class ImportPlugin(plugins.ImportPluginBase):
                     "Update repair present (Y, N or enter for ?): "
                 ) or '?'
 
-            if planetary is '?':
-                planetary = input(
-                    "Update planetary (Y, N or enter for ?): "
-                ) or '?'
-
             # This is unreliable, so ask the user if unknown.
             if 'commodities' in api.profile['lastStarport']:
                 market = 'Y'
@@ -4022,8 +4019,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                 outfitting != station_lookup.outfitting or
                 rearm != station_lookup.rearm or
                 refuel != station_lookup.refuel or
-                repair != station_lookup.repair or
-                planetary != station_lookup.planetary
+                repair != station_lookup.repair
             ):
                 if tdb.updateLocalStation(
                     station=station_lookup,
@@ -4035,8 +4031,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                     outfitting=outfitting,
                     rearm=rearm,
                     refuel=refuel,
-                    repair=repair,
-                    planetary=planetary
+                    repair=repair
                 ):
                     lines, csvPath = csvexport.exportTableToFile(
                         tdb,
