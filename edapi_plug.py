@@ -3490,7 +3490,11 @@ modules = {
  128672293: {'category': 'internal',
              'class': '6',
              'name': 'Planetary Vehicle Hangar',
-             'rating': 'G'}
+             'rating': 'G'},
+ 128672317: {'category': 'internal',
+             'class': '1',
+             'name': 'Planetary Approach Suite',
+             'rating': 'I'},
 }
 
 
