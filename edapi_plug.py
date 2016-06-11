@@ -21,7 +21,7 @@ import sys
 import textwrap
 import time
 
-__version_info__ = ('3', '6', '1')
+__version_info__ = ('3', '6', '2')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -111,19 +111,31 @@ cat_correct = {
 # TD has different names for these.
 comm_correct = {
     'Agricultural Medicines': 'Agri-Medicines',
+    'Ai Relics': 'AI Relics',
+    'Animalmeat': 'Animal Meat',
     'Atmospheric Extractors': 'Atmospheric Processors',
     'Auto Fabricators': 'Auto-Fabricators',
     'Basic Narcotics': 'Narcotics',
     'Bio Reducing Lichen': 'Bioreducing Lichen',
+    'C M M Composite': 'CMM Composite',
+    'Comercial Samples': 'Commercial Samples',
+    'Diagnostic Sensor': 'Hardware Diagnostic Sensor',
+    'Encripted Data Storage': 'Encrypted Data Storage',
+    'H N Shock Mount': 'HN Shock Mount',
     'Hafnium178': 'Hafnium 178',
     'Hazardous Environment Suits': 'H.E. Suits',
     'Heliostatic Furnaces': 'Microbial Furnaces',
     'Marine Supplies': 'Marine Equipment',
     'Meta Alloys': 'Meta-Alloys',
+    'Methanol Monohydrate Crystals': 'Methanol Monohydrate',
+    'Mu Tom Imager': 'Muon Imager',
     'Non Lethal Weapons': 'Non-Lethal Weapons',
+    'Power Grid Assembly': 'Energy Grid Assembly',
     'S A P8 Core Container': 'SAP 8 Core Container',
     'Skimer Components': 'Skimmer Components',
     'Terrain Enrichment Systems': 'Land Enrichment Systems',
+    'Trinkets Of Fortune': 'Trinkets Of Hidden Fortune',
+    'Unknown Artifact': 'Unknown Artefact',
     'U S S Cargo Ancient Artefact': 'Ancient Artefact',
     'U S S Cargo Experimental Chemicals': 'Experimental Chemicals',
     'U S S Cargo Military Plans': 'Military Plans',
@@ -131,6 +143,7 @@ comm_correct = {
     'U S S Cargo Rebel Transmissions': 'Rebel Transmissions',
     'U S S Cargo Technical Blueprints': 'Technical Blueprints',
     'U S S Cargo Trade Data': 'Trade Data',
+    'Wreckage Components': 'Salvageable Wreckage',
 }
 
 modules = {
