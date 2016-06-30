@@ -3707,11 +3707,15 @@ class EDDN:
     def __init__(
         self,
         uploaderID,
+        noHash,
         softwareName,
         softwareVersion
     ):
         # Obfuscate uploaderID
-        self.uploaderID = hashlib.sha1(uploaderID.encode('utf-8')).hexdigest()
+        if noHash:
+            self.uploaderID = uploaderID
+        else:
+            self.uploaderID = hashlib.sha1(uploaderID.encode('utf-8')).hexdigest()
         self.softwareName = softwareName
         self.softwareVersion = softwareVersion
 
@@ -3838,6 +3842,7 @@ class ImportPlugin(plugins.ImportPluginBase):
 
     pluginOptions = {
         'csvs': 'Merge shipyard into into ShipVendor.csv.',
+        'name': 'Do not obfuscate commander name for EDDN submit.',
         'eddn': 'Post market prices to EDDN.',
     }
 
@@ -4185,6 +4190,7 @@ class ImportPlugin(plugins.ImportPluginBase):
             print('Posting prices to EDDN...')
             con = EDDN(
                 api.profile['commander']['name'],
+                self.getOption("name"),
                 'EDAPI Trade Dangerous Plugin',
                 __version__
             )
