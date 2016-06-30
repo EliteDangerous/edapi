@@ -125,6 +125,7 @@ comm_correct = {
     'Hafnium178': 'Hafnium 178',
     'Hazardous Environment Suits': 'H.E. Suits',
     'Heliostatic Furnaces': 'Microbial Furnaces',
+    'Low Temperature Diamond': 'Low Temperature Diamonds',
     'Marine Supplies': 'Marine Equipment',
     'Meta Alloys': 'Meta-Alloys',
     'Methanol Monohydrate Crystals': 'Methanol Monohydrate',
