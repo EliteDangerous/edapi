@@ -3555,6 +3555,7 @@ class EDAPI:
 
         # Grab the commander profile
         response = self._getURI('profile')
+        self.text = response.text
         try:
             self.profile = response.json()
         except:
@@ -3843,6 +3844,7 @@ class ImportPlugin(plugins.ImportPluginBase):
     pluginOptions = {
         'csvs': 'Merge shipyard into into ShipVendor.csv.',
         'name': 'Do not obfuscate commander name for EDDN submit.',
+        'save': 'Save the API response (tmp/profile.YYYYMMDD_HHMMSS.json).',
         'eddn': 'Post market prices to EDDN.',
     }
 
@@ -3867,6 +3869,13 @@ class ImportPlugin(plugins.ImportPluginBase):
         if not api.profile['commander']['docked']:
             print('Commander not docked. Aborting!')
             return False
+
+        # save profile if requested
+        if self.getOption("save"):
+            saveName = 'tmp/profile.' + time.strftime('%Y%m%d_%H%M%S') + '.json'
+            with open(saveName, 'w', encoding="utf-8") as saveFile:
+                saveFile.write(api.text)
+                print('API response saved to: {}'.format(saveName))
 
         # Figure out where we are.
         system = api.profile['lastSystem']['name']
@@ -4074,7 +4083,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                 ships.append(ship['name'])
 
             for ship in ships:
-                    eddn_ships.append(eddn_ship_names[ship])
+                eddn_ships.append(eddn_ship_names[ship])
 
             if self.getOption("csvs"):
                 db = tdb.getDB()
