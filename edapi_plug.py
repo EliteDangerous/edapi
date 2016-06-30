@@ -3884,8 +3884,6 @@ class ImportPlugin(plugins.ImportPluginBase):
         except LookupError:
             station_lookup = None
 
-        print(station_lookup)
-
         # The station isn't known. Add it.
         if not station_lookup:
             print('Station unknown.')
@@ -3958,6 +3956,7 @@ class ImportPlugin(plugins.ImportPluginBase):
             station_lookup = tdb.lookupStation(station, system)
         else:
             # See if we need to update the info for this station.
+            print('Station known.')
             lsFromStar = station_lookup.lsFromStar
             blackMarket = station_lookup.blackMarket
             maxPadSize = station_lookup.maxPadSize
