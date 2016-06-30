@@ -22,7 +22,7 @@ import traceback
 
 import eddn
 
-__version_info__ = ('3', '6', '2')
+__version_info__ = ('3', '6', '3')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -64,6 +64,7 @@ comm_correct = {
     'Hafnium178': 'Hafnium 178',
     'Hazardous Environment Suits': 'H.E. Suits',
     'Heliostatic Furnaces': 'Microbial Furnaces',
+    'Low Temperature Diamond': 'Low Temperature Diamonds',
     'Marine Supplies': 'Marine Equipment',
     'Meta Alloys': 'Meta-Alloys',
     'Methanol Monohydrate Crystals': 'Methanol Monohydrate',
@@ -3687,6 +3688,12 @@ def parse_args():
                         help="Used with --keys. If present will print all\
                         content below the specificed key.")
 
+    # no hashing
+    parser.add_argument("--nohash",
+                        action="store_true",
+                        default=False,
+                        help="Do not obfuscate commander name for EDDN submit.")
+
     # Parse the command line.
     args = parser.parse_args()
 
@@ -4457,6 +4464,7 @@ def Main():
         print('Posting prices to EDDN...')
         con = eddn.EDDN(
             api.profile['commander']['name'],
+            args.nohash,
             'EDAPI',
             __version__
         )
