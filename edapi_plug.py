@@ -4156,12 +4156,6 @@ class ImportPlugin(plugins.ImportPluginBase):
                         }
                     )
 
-                f.write(
-                    "\t+ {}\n".format(
-                        commodity['categoryname']
-                    )
-                )
-
                 # If stock is zero, list it as unavailable.
                 # If the stockBracket is zero, ignore any stock.
                 if not commodity['stock'] or not commodity['stockBracket']:
