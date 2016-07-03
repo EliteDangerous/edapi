@@ -51,11 +51,26 @@ Copy edapi_plug.py to the plugins directory in Trade Dangerous. Use the
 import command to connect to the API and import price and shipyard
 data.
 
-./trade.py import -P edapi
+Basic usage:
 
-You can also import to EDDN with the plugin:
+    trade.py import --plug edapi
+      This will query the API for information abotu your currently docked
+      station and import any market prices and shipyard information
+      available. You will be prompted to enter any missing station information.
 
-./trade.py import -P edapi -O eddn
+    trade.py imp -P edapi -O eddn
+      This will do the same thing, but also post your market, shipyard, and
+      outfitting modules to EDDN.
+
+Options (-O):
+
+    csvs:  Merge shipyards into ShipVendor.csv.
+    edcd:  Download current FDevIDs from EDCD
+    eddn:  Post market, shipyard and outfitting to EDDN.
+    name:  Do not obfuscate commander name for EDDN submit.
+    save:  Save the API response (tmp/profile.YYYYMMDD_HHMMSS.json).
+
+
 
 ==============================================================================
 == Acknowledgements
