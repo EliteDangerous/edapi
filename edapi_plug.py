@@ -23,7 +23,7 @@ import time
 import mapping
 import transfers
 
-__version_info__ = ('3', '7', '0')
+__version_info__ = ('3', '7', '1')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -375,11 +375,11 @@ class ImportPlugin(plugins.ImportPluginBase):
     """
 
     pluginOptions = {
-        'csvs': 'Merge shipyard into into ShipVendor.csv.',
+        'csvs': 'Merge shipyards into ShipVendor.csv.',
         'name': 'Do not obfuscate commander name for EDDN submit.',
         'save': 'Save the API response (tmp/profile.YYYYMMDD_HHMMSS.json).',
         'edcd': 'Download current FDevIDs from EDCD',
-        'eddn': 'Post market prices to EDDN.',
+        'eddn': 'Post market, shipyard and outfitting to EDDN.',
     }
 
     cookieFile = "edapi.cookies"
