@@ -65,7 +65,7 @@ Basic usage:
 Options (-O):
 
     csvs:  Merge shipyards into ShipVendor.csv.
-    edcd:  Download current FDevIDs from EDCD
+    edcd:  Call the EDCD plugin first
     eddn:  Post market, shipyard and outfitting to EDDN.
     name:  Do not obfuscate commander name for EDDN submit.
     save:  Save the API response (tmp/profile.YYYYMMDD_HHMMSS.json).

@@ -23,14 +23,14 @@ import time
 import mapping
 import transfers
 
-__version_info__ = ('3', '7', '1')
+__version_info__ = ('3', '7', '2')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
 # Deal with some differences in names between TD, ED and the API.
 # ----------------------------------------------------------------
 
-bracket_levels = ('-', 'L', 'M', 'H')
+bracket_levels = ('?', 'L', 'M', 'H')
 
 # Categories to ignore. Drones end up here. No idea what they are.
 cat_ignore = [
@@ -378,7 +378,7 @@ class ImportPlugin(plugins.ImportPluginBase):
         'csvs': 'Merge shipyards into ShipVendor.csv.',
         'name': 'Do not obfuscate commander name for EDDN submit.',
         'save': 'Save the API response (tmp/profile.YYYYMMDD_HHMMSS.json).',
-        'edcd': 'Download current FDevIDs from EDCD',
+        'edcd': 'Call the EDCD plugin first',
         'eddn': 'Post market, shipyard and outfitting to EDDN.',
     }
 
@@ -391,49 +391,21 @@ class ImportPlugin(plugins.ImportPluginBase):
         cookieFilePath = pathlib.Path(ImportPlugin.cookieFile)
         self.cookiePath = tdb.dataPath / cookieFilePath
 
-    def download_fdevids(self):
-        """
-            Download the current Shipyard and Outfitting data
-            from EDCD, see https://github.com/EDCD/FDevIDs
-        """
-        tdb, tdenv = self.tdb, self.tdenv
-
-        baseUrl = "https://raw.githubusercontent.com/EDCD/FDevIDs/master/"
-        downloadList = [
-            ('FDevShipyard', 'FDevShipyard.csv', 'shipyard.csv'),
-            ('FDevOutfitting', 'FDevOutfitting.csv', 'outfitting.csv'),
-        ]
-
-        db = tdb.getDB()
-        for tableName, fileTD, fileEDCD in downloadList:
-            localPath = tdb.dataPath / pathlib.Path(fileTD)
-            transfers.download(
-                tdenv,
-                baseUrl + fileEDCD,
-                str(localPath),
-            )
-            db.execute("DELETE FROM {}".format(tableName))
-            cache.processImportFile(
-                tdenv,
-                db,
-                localPath,
-                tableName
-            )
-            lines, csvPath = csvexport.exportTableToFile(
-                tdb,
-                tdenv,
-                tableName,
-            )
-            tdenv.NOTE("{} updated.", csvPath)
-        db.commit()
-
     def run(self):
         tdb, tdenv = self.tdb, self.tdenv
 
         # first check for EDCD
         if self.getOption("edcd"):
-            # download the current FDevIDs from EDCD
-            self.download_fdevids()
+            # Call the EDCD plugin
+            try:
+                import plugins.edcd_plug as EDCD
+            except:
+                raise plugins.PluginException("EDCD plugin not found.")
+            tdenv.NOTE("Calling the EDCD plugin.")
+            edcdPlugin = EDCD.ImportPlugin(tdb, tdenv)
+            edcdPlugin.options["csvs"] = True
+            edcdPlugin.run()
+            tdenv.NOTE("Going back to EDAPI.\n")
 
         # now load the mapping tables
         itemMap = mapping.FDEVMappingItems(tdb, tdenv)
@@ -553,8 +525,11 @@ class ImportPlugin(plugins.ImportPluginBase):
                     "Station"
                 )
                 tdenv.NOTE("{} updated.", csvPath)
-                station_lookup = tdb.lookupPlace(place)
             station_lookup = tdb.lookupStation(station, system)
+            if not station_lookup:
+                raise plugins.PluginException(
+                    "Something went wrong while adding the station to the DB."
+                )
         else:
             # See if we need to update the info for this station.
             print('Station known.')
@@ -660,20 +635,59 @@ class ImportPlugin(plugins.ImportPluginBase):
                     )
                     tdenv.NOTE("{} updated.", csvPath)
 
-        # If a shipyard exists, update the ship vendor list.
+        def consistencyCheck(checkName, checkList):
+            warnList = [
+                "The station should{s} have a {what}, but the API did{d} return one.",
+                "If you think the DB entry is wrong you can correct it by running:",
+                "   trade.py station -u --{what} {yn} '@{sys}/{stn}'",
+            ]
+            warnParameter = [
+                ("n't", "", "Y"),
+                ("", "n't", "N"),
+            ]
+            warnResult  = False
+            checkResult = True
+
+            checkAttribute = getattr(station_lookup, checkName)
+            if len(checkList) > 0:
+                if checkAttribute == "N":
+                    warnResult  = True
+                    checkResult = False
+                    s, d, yn = warnParameter[0]
+                    warnList.append("Ignoring {what}.")
+            else:
+                checkResult = False
+                if checkAttribute == "Y":
+                    warnResult  = True
+                    s, d, yn = warnParameter[1]
+
+            if warnResult:
+                for warnText in warnList:
+                    tdenv.WARN(
+                        warnText,
+                        what=checkName, sys=system, stn=station,
+                        s=s, d=d, yn=yn
+                    )
+            return checkResult
+
+        # If a shipyard exists, make the ship lists
         shipList = []
-        yardList = []
+        eddn_ships = []
         if 'ships' in api.profile['lastStarport']:
             if 'shipyard_list' in api.profile['lastStarport']['ships']:
                 for ship in api.profile['lastStarport']['ships']['shipyard_list'].values():
                     shipList.append(shipMap.mapID(ship['id'], ship['name']))
-                    yardList.append(yardMap.mapID(ship['id'], ship['name']))
+                    eddn_ships.append(yardMap.mapID(ship['id'], ship['name']))
 
             if 'unavailable_list' in api.profile['lastStarport']['ships']:
                 for ship in api.profile['lastStarport']['ships']['unavailable_list']:
                     shipList.append(shipMap.mapID(ship['id'], ship['name']))
-                    yardList.append(yardMap.mapID(ship['id'], ship['name']))
+                    eddn_ships.append(yardMap.mapID(ship['id'], ship['name']))
 
+        if not consistencyCheck("shipyard", shipList):
+            del shipList[:]
+            del eddn_ships[:]
+        else:
             if self.getOption("csvs"):
                 db = tdb.getDB()
                 # first delete all ships
@@ -702,84 +716,93 @@ class ImportPlugin(plugins.ImportPluginBase):
                     "ShipVendor",
                 )
 
-        # Some sanity checking on the market.
-        if 'commodities' not in api.profile['lastStarport']:
-            print(
-                'The API did not return a commodity market for this station.'
-            )
-            print(
-                'If you think this is wrong, try again. The API will '
-                'occasionally skip the market.'
-            )
-            return False
-
-        # Create the import file.
-        with open(self.filename, 'w', encoding="utf-8") as f:
-            f.write("@ {}/{}\n".format(system, station))
-            eddn_market = []
+        # If a market exists, make the item lists
+        itemList = []
+        eddn_market = []
+        if 'commodities' in api.profile['lastStarport']:
             for commodity in api.profile['lastStarport']['commodities']:
                 if commodity['categoryname'] in cat_ignore:
                     continue
-                commodity['name'] = itemMap.mapID(commodity['id'], commodity['name'])
+                itmName = itemMap.mapID(commodity['id'], commodity['name'])
 
                 def commodity_int(key):
                     try:
-                        commodity[key] = int(commodity[key])
+                        ret = int(commodity[key])
                     except (ValueError, KeyError):
-                        commodity[key] = 0
+                        ret = 0
+                    return ret
 
-                commodity_int('stock')
-                commodity_int('demand')
-                commodity_int('demandBracket')
-                commodity_int('stockBracket')
-                commodity_int('buyPrice')
-                commodity_int('sellPrice')
+                itmSupply      = commodity_int('stock')
+                itmDemand      = commodity_int('demand')
+                itmSupplyLevel = commodity_int('stockBracket')
+                itmDemandLevel = commodity_int('demandBracket')
+                itmBuyPrice    = commodity_int('buyPrice')
+                itmSellPrice   = commodity_int('sellPrice')
+
+                demandLevel = True
+                supplyLevel = True
+                if itmBuyPrice == 0:
+                    # If there is not buyPrice, ignore stock
+                    supplyLevel = False
+                    itmSupply = 0
+                    itmSupplyLevel = 0
+                    tdSupply = "-"
+                    tdDemand = "{}{}".format(
+                        itmDemand,
+                        bracket_levels[itmDemandLevel]
+                    )
+                else:
+                    # otherwise don't care about demand
+                    demandLevel = False
+                    itmDemand = 0
+                    itmDemandLevel = 0
+                    tdDemand = "?"
+                    tdSupply = "{}{}".format(
+                        itmSupply,
+                        bracket_levels[itmSupplyLevel]
+                    )
+
+                itemTD = (
+                    itmName,
+                    itmSellPrice, itmBuyPrice,
+                    tdDemand, tdSupply,
+                )
+                itemList.append(itemTD)
 
                 # Populate EDDN
                 if self.getOption("eddn"):
-                    eddn_market.append(
-                        {
-                            "name": commodity['name'],
-                            "buyPrice": commodity['buyPrice'],
-                            "supply": commodity['stock'],
-                            "supplyLevel": EDDN._levels[commodity['stockBracket']],  # NOQA
-                            "sellPrice": commodity['sellPrice'],
-                            "demand": commodity['demand'],
-                            "demandLevel": EDDN._levels[commodity['demandBracket']]  # NOQA
-                        }
-                    )
+                    itemEDDN = {
+                        "name":      itmName,
+                        "buyPrice":  itmBuyPrice,
+                        "supply":    itmSupply,
+                        "sellPrice": itmSellPrice,
+                        "demand":    itmDemand,
+                    }
+                    if supplyLevel:
+                        itemEDDN["supplyLevel"] = EDDN._levels[itmSupplyLevel]
+                    if demandLevel:
+                        itemEDDN["demandLevel"] = EDDN._levels[itmDemandLevel]
+                    eddn_market.append(itemEDDN)
 
-                # If stock is zero, list it as unavailable.
-                # If the stockBracket is zero, ignore any stock.
-                if not commodity['stock'] or not commodity['stockBracket']:
-                    commodity['stock'] = '-'
-                else:
-                    demand = bracket_levels[commodity['stockBracket']]
-                    commodity['stock'] = str(commodity['stock'])+demand
+        if not consistencyCheck("market", itemList):
+            del itemList[:]
+            del eddn_market[:]
+        else:
+            # Create the import file.
+            with open(self.filename, 'w', encoding="utf-8") as f:
+                # write System/Station line
+                f.write("@ {}/{}\n".format(system, station))
 
-                # If demand is zero, list as unknown.
-                if not (commodity['demand'] and commodity['demandBracket']):
-                    commodity['demand'] = '?'
-                else:
-                    demand = bracket_levels[commodity['demandBracket']]
-                    commodity['demand'] = str(commodity['demand'])+demand
+                # write Item lines (category lines are not needed)
+                for itemTD in itemList:
+                    f.write("\t\t%s %s %s %s %s\n" % itemTD)
 
-                f.write(
-                    "\t\t{} {} {} {} {}\n".format(
-                        commodity['name'],
-                        commodity['sellPrice'],
-                        commodity['buyPrice'],
-                        commodity['demand'],
-                        commodity['stock'],
-                    ))
-
-        tdenv.ignoreUnknown = True
-
-        cache.importDataFromFile(
-            tdb,
-            tdenv,
-            pathlib.Path(self.filename),
-        )
+            tdenv.ignoreUnknown = True
+            cache.importDataFromFile(
+                tdb,
+                tdenv,
+                pathlib.Path(self.filename),
+            )
 
         # Import EDDN
         if self.getOption("eddn"):
@@ -791,7 +814,7 @@ class ImportPlugin(plugins.ImportPluginBase):
             )
             con._debug = False
 
-            if len(eddn_market):
+            if eddn_market:
                 print('Posting commodities to EDDN...')
                 con.publishCommodities(
                     system,
@@ -799,12 +822,12 @@ class ImportPlugin(plugins.ImportPluginBase):
                     eddn_market
                 )
 
-            if len(yardList):
+            if eddn_ships:
                 print('Posting shipyard to EDDN...')
                 con.publishShipyard(
                     system,
                     station,
-                    yardList
+                    eddn_ships
                 )
 
             if 'modules' in api.profile['lastStarport']:
@@ -819,7 +842,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                             ('bobble', 'decal', 'paintjob')
                         ):
                             tdenv.NOTE("Unknown module ID: {}, name: {}", module['id'], module['name'])
-                if len(eddn_modules):
+                if consistencyCheck("outfitting", eddn_modules):
                     print('Posting outfitting to EDDN...')
                     con.publishOutfitting(
                         system,
