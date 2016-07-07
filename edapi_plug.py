@@ -418,10 +418,16 @@ class ImportPlugin(plugins.ImportPluginBase):
         # defaults from API response are not reliable!
         if 'commodities' in self.edAPI.profile['lastStarport']:
             defMarket = "Y"
+        else:
+            defMarket = "N"
         if 'ships' in self.edAPI.profile['lastStarport']:
             defShipyard = "Y"
+        else:
+            defShipyard = "N"
         if 'modules' in self.edAPI.profile['lastStarport']:
             defOutfitting = "Y"
+        else:
+            defOutfitting = "N"
 
         def warnAPIResponse(checkName, checkYN):
             warnText = (
@@ -567,7 +573,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                 tdenv,
                 "Station",
             )
-            tdenv.NOTE("{} updated.", csvPath)
+            tdenv.DEBUG0("{} updated.", csvPath)
         return station
 
     def run(self):
@@ -664,15 +670,24 @@ class ImportPlugin(plugins.ImportPluginBase):
                     eddn_ships.append(yardMap.mapID(ship['id'], ship['name']))
 
         if self.getOption("csvs"):
+            exportCSV = False
             db = tdb.getDB()
             # first delete all ships
-            db.execute(
-                """
-                DELETE FROM ShipVendor
-                 WHERE station_id = ?
-                """,
-                [station.ID]
-            )
+            if ((len(shipList) > 0) or (station.shipyard == "N")):
+                # but only if there should be no shipyard or there is a new list
+                delRows = db.execute(
+                    """
+                    DELETE FROM ShipVendor
+                     WHERE station_id = ?
+                    """,
+                    [station.ID]
+                ).rowcount
+                if delRows > 0:
+                    exportCSV = True
+                    tdenv.NOTE(
+                        "Deleted {} ships in '{}' shipyard.",
+                        delRows, station.name()
+                    )
             # and now add the shipyard list
             for ship in shipList:
                 ship_lookup = tdb.lookupShip(ship)
@@ -683,16 +698,19 @@ class ImportPlugin(plugins.ImportPluginBase):
                     """,
                     [ship_lookup.ID, station.ID]
                 )
+                exportCSV = True
             db.commit()
-            tdenv.NOTE(
-                "Updated {} ships in '{}' shipyard.",
-                len(shipList), station.name()
-            )
-            lines, csvPath = csvexport.exportTableToFile(
-                tdb,
-                tdenv,
-                "ShipVendor",
-            )
+            if exportCSV:
+                tdenv.NOTE(
+                    "Added {} ships in '{}' shipyard.",
+                    len(shipList), station.name()
+                )
+                lines, csvPath = csvexport.exportTableToFile(
+                    tdb,
+                    tdenv,
+                    "ShipVendor",
+                )
+                tdenv.DEBUG0("{} updated.", csvPath)
 
         # If a market exists, make the item lists
         itemList = []
