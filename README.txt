@@ -62,13 +62,21 @@ Basic usage:
       This will do the same thing, but also post your market, shipyard, and
       outfitting modules to EDDN.
 
+    trade.py imp -P edapi -O test=tmp/profile.20160707_202255.json
+      This will load a API-response from the given file and work with that
+      instead of querying to the companion API. If the EDDN option is also
+      given, it will use the "test" schema instead of the production one
+      and print out the sent message(s).
+
 Options (-O):
 
     csvs:  Merge shipyards into ShipVendor.csv.
-    edcd:  Download current FDevIDs from EDCD
+    edcd:  Call the EDCD plugin first
     eddn:  Post market, shipyard and outfitting to EDDN.
     name:  Do not obfuscate commander name for EDDN submit.
     save:  Save the API response (tmp/profile.YYYYMMDD_HHMMSS.json).
+    test:  Test the plugin with a json file (test=[FILENAME]).
+    warn:  Ask for station update if a API<->DB diff is encountered.
 
 
 
