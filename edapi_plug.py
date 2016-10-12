@@ -25,7 +25,7 @@ import transfers
 from collections import namedtuple
 
 
-__version_info__ = ('3', '7', '4')
+__version_info__ = ('3', '7', '5')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -221,8 +221,8 @@ class EDDN:
     }
 
     _shipyard_schemas = {
-        'production': 'http://schemas.elite-markets.net/eddn/shipyard/1',
-        'test': 'http://schemas.elite-markets.net/eddn/shipyard/1/test',
+        'production': 'http://schemas.elite-markets.net/eddn/shipyard/2',
+        'test': 'http://schemas.elite-markets.net/eddn/shipyard/2/test',
     }
 
     _outfitting_schemas = {
@@ -600,12 +600,11 @@ class ImportPlugin(plugins.ImportPluginBase):
         # now load the mapping tables
         itemMap = mapping.FDEVMappingItems(tdb, tdenv)
         shipMap = mapping.FDEVMappingShips(tdb, tdenv)
-        yardMap = mapping.FDEVMappingShipyard(tdb, tdenv)
         outfMap = mapping.FDEVMappingOutfitting(tdb, tdenv)
 
         if self.getOption("eddn"):
-            if yardMap.mapCount == 0 or outfMap.mapCount == 0:
-                tdenv.NOTE("No Ship or Outfitting mapping for EDDN found.")
+            if outfMap.mapCount == 0:
+                tdenv.NOTE("No Outfitting mapping for EDDN found.")
                 tdenv.NOTE("Please set option 'edcd' to download current mappings.")
                 return False
 
@@ -689,12 +688,12 @@ class ImportPlugin(plugins.ImportPluginBase):
             if 'shipyard_list' in api.profile['lastStarport']['ships']:
                 for ship in api.profile['lastStarport']['ships']['shipyard_list'].values():
                     shipList.append(shipMap.mapID(ship['id'], ship['name']))
-                    eddn_ships.append(yardMap.mapID(ship['id'], ship['name']))
+                    eddn_ships.append(ship['name'])
 
             if 'unavailable_list' in api.profile['lastStarport']['ships']:
                 for ship in api.profile['lastStarport']['ships']['unavailable_list']:
                     shipList.append(shipMap.mapID(ship['id'], ship['name']))
-                    eddn_ships.append(yardMap.mapID(ship['id'], ship['name']))
+                    eddn_ships.append(ship['name'])
 
         if self.getOption("csvs"):
             exportCSV = False
