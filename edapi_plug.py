@@ -226,8 +226,8 @@ class EDDN:
     }
 
     _outfitting_schemas = {
-        'production': 'http://schemas.elite-markets.net/eddn/outfitting/1',
-        'test': 'http://schemas.elite-markets.net/eddn/outfitting/1/test',
+        'production': 'http://schemas.elite-markets.net/eddn/outfitting/2',
+        'test': 'http://schemas.elite-markets.net/eddn/outfitting/2/test',
     }
 
     _debug = True
@@ -600,13 +600,6 @@ class ImportPlugin(plugins.ImportPluginBase):
         # now load the mapping tables
         itemMap = mapping.FDEVMappingItems(tdb, tdenv)
         shipMap = mapping.FDEVMappingShips(tdb, tdenv)
-        outfMap = mapping.FDEVMappingOutfitting(tdb, tdenv)
-
-        if self.getOption("eddn"):
-            if outfMap.mapCount == 0:
-                tdenv.NOTE("No Outfitting mapping for EDDN found.")
-                tdenv.NOTE("Please set option 'edcd' to download current mappings.")
-                return False
 
         # Connect to the API, authenticate, and pull down the commander
         # /profile.
@@ -859,13 +852,20 @@ class ImportPlugin(plugins.ImportPluginBase):
             ):
                 eddn_modules = []
                 for module in api.profile['lastStarport']['modules'].values():
-                    res = outfMap.mapID(module['id'], None)
-                    if res:
-                        eddn_modules.append(res)
+                    # see: https://github.com/jamesremuscat/EDDN/wiki
+                    addModule = False
+                    if module['name'].startswith(('Hpt_', 'Int_')) or module['name'].find('_Armour_') > 0:
+                        if module.get('sku', None) in (
+                            None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+                        ):
+                            if module['name'] != 'Int_PlanetApproachSuite':
+                                addModule = True
+                    if addModule:
+                        eddn_modules.append(module['name'])
                     else:
-                        # ignore Bobble, Decals and PaintJobs
-                        if not module['name'].lower().startswith(
-                            ('bobble', 'decal', 'paintjob')
+                        # ignore Bobblehead, Decals, PaintJobs and Shipkit
+                        if module['category'] not in (
+                            'bobblehead', 'decal', 'paintjob', 'shipkit'
                         ):
                             tdenv.NOTE("Unknown module ID: {}, name: {}", module['id'], module['name'])
                 if eddn_modules:
@@ -873,7 +873,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                     con.publishOutfitting(
                         sysName,
                         stnName,
-                        eddn_modules
+                        sorted(eddn_modules)
                     )
 
         # We did all the work
