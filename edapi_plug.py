@@ -216,8 +216,8 @@ class EDDN:
     )
 
     _market_schemas = {
-        'production': 'http://schemas.elite-markets.net/eddn/commodity/2',
-        'test': 'http://schemas.elite-markets.net/eddn/commodity/2/test',
+        'production': 'http://schemas.elite-markets.net/eddn/commodity/3',
+        'test': 'http://schemas.elite-markets.net/eddn/commodity/3/test',
     }
 
     _shipyard_schemas = {
@@ -744,7 +744,7 @@ class ImportPlugin(plugins.ImportPluginBase):
 
                 def commodity_int(key):
                     try:
-                        ret = int(commodity[key])
+                        ret = int(float(commodity[key])+0.5)
                     except (ValueError, KeyError):
                         ret = 0
                     return ret
@@ -789,16 +789,17 @@ class ImportPlugin(plugins.ImportPluginBase):
                 # Populate EDDN
                 if self.getOption("eddn"):
                     itemEDDN = {
-                        "name":      itmName,
-                        "buyPrice":  itmBuyPrice,
-                        "supply":    itmSupply,
-                        "sellPrice": itmSellPrice,
-                        "demand":    itmDemand,
+                        "name":          commodity['name'],
+                        "meanPrice":     commodity_int('meanPrice'),
+                        "buyPrice":      commodity_int('buyPrice'),
+                        "stock":         commodity_int('stock'),
+                        "stockBracket":  commodity['stockBracket'],
+                        "sellPrice":     commodity_int('sellPrice'),
+                        "demand":        commodity_int('demand'),
+                        "demandBracket": commodity['demandBracket'],
                     }
-                    if supplyLevel:
-                        itemEDDN["supplyLevel"] = EDDN._levels[itmSupplyLevel]
-                    if demandLevel:
-                        itemEDDN["demandLevel"] = EDDN._levels[itmDemandLevel]
+                    if len(commodity['statusFlags']) > 0:
+                        itemEDDN["statusFlags"] = commodity['statusFlags']
                     eddn_market.append(itemEDDN)
 
         if itemList:
