@@ -863,12 +863,8 @@ class ImportPlugin(plugins.ImportPluginBase):
                                 addModule = True
                     if addModule:
                         eddn_modules.append(module['name'])
-                    else:
-                        # ignore Bobblehead, Decals, PaintJobs and Shipkit
-                        if module['category'] not in (
-                            'bobblehead', 'decal', 'paintjob', 'shipkit'
-                        ):
-                            tdenv.NOTE("Unknown module ID: {}, name: {}", module['id'], module['name'])
+                    elif self.getOption("test"):
+                        tdenv.NOTE("Ignored module ID: {}, name: {}", module['id'], module['name'])
                 if eddn_modules:
                     print('Posting outfitting to EDDN...')
                     con.publishOutfitting(
