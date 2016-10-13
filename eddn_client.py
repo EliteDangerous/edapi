@@ -99,9 +99,9 @@ def Main():
     '''
     # These are the schemas we will decode.
     allowed_schemas = {
-        'http://schemas.elite-markets.net/eddn/commodity/2': 'commodity-v2',
-        'http://schemas.elite-markets.net/eddn/shipyard/1': 'shipyard-v1',
-        'http://schemas.elite-markets.net/eddn/outfitting/1': 'outfitting-v1',
+        'http://schemas.elite-markets.net/eddn/commodity/3': 'commodity-v3',
+        'http://schemas.elite-markets.net/eddn/shipyard/2': 'shipyard-v2',
+        'http://schemas.elite-markets.net/eddn/outfitting/2': 'outfitting-v2',
     }
 
     # If debug, only listen for test type messages.
@@ -162,7 +162,7 @@ def Main():
                 else:
                     schema += ': ' + message['$schemaRef']
                 uploaderID = message['header']['uploaderID']
-                uploaderID = uploaderID[:16]+'...' if len(uploaderID)>16 else uploaderID
+                uploaderID = uploaderID[:16]+'...' if len(uploaderID) > 16 else uploaderID  # NOQA
                 echoLog(
                     'Received ' + schema +
                     ' ' + message['header']['softwareName'] +
@@ -192,38 +192,51 @@ def Main():
                 echoLog('\t\t- System Name: ' + message['message']['systemName'])  # NOQA
                 echoLog('\t\t- Station Name: ' + message['message']['stationName'])  # NOQA
 
-                # Handle commodity v2
-                if schema == 'commodity-v2':
+                # Handle commodity v3
+                if schema == 'commodity-v3':
                     for com in message['message']['commodities']:
-                        echoLog('\t\t\t- Name: ' + com['name'])
-                        echoLog('\t\t\t\t- Buy Price: ' + str(com['buyPrice']))
                         echoLog(
-                            '\t\t\t\t- Supply: ' +
-                            str(com['supply']) +
-                            ' (' + com.get('supplyLevel', 'N/A') + ')'
+                            '\t\t\t- Name: ' +
+                            com['name']
                         )
-                        echoLog('\t\t\t\t- Sell Price: ' + str(com['sellPrice']))  # NOQA
+                        echoLog(
+                            '\t\t\t\t- Buy Price: ' +
+                            str(com['buyPrice'])
+                        )
+                        echoLog(
+                            '\t\t\t\t- Stock: ' +
+                            str(com['stock']) +
+                            ' (' +
+                            str(com.get('stockBracket', 'N/A')) +
+                            ')'
+                        )
+                        echoLog(
+                            '\t\t\t\t- Sell Price: ' +
+                            str(com['sellPrice'])
+                        )
                         echoLog(
                             '\t\t\t\t- Demand: ' +
                             str(com['demand']) +
-                            ' (' + com.get('demandLevel', 'N/A') + ')'
+                            ' (' +
+                            str(com.get('demandBracket', 'N/A')) +
+                            ')'
                         )
 
                     echoLog('')
                     echoLog('')
 
-                # Handle shipyard v1
-                if schema == 'shipyard-v1':
+                # Handle shipyard v2
+                if schema == 'shipyard-v2':
                     for ship in message['message']['ships']:
                         echoLog('\t\t\t- Ship: ' + ship)
 
                     echoLog('')
                     echoLog('')
 
-                # Handle outfitting v1
-                if schema == 'outfitting-v1':
+                # Handle outfitting v2
+                if schema == 'outfitting-v2':
                     for module in message['message']['modules']:
-                        echoLog('\t\t\t- Module: ' + module['name'])
+                        echoLog('\t\t\t- Module: ' + module)
 
                     echoLog('')
                     echoLog('')
