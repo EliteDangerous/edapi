@@ -1,7 +1,7 @@
 """
 Python Implementation of the EDDN publisher:
 
-    https://github.com/jamesremuscat/EDDN/blob/master/examples/PHP/EDDN.php
+https://github.com/jamesremuscat/EDDN/blob/master/examples/PHP/EDDN.php
 """
 
 from datetime import datetime, timezone
@@ -17,19 +17,19 @@ class EDDN:
         # 'http://eddn-gateway.ed-td.space:8080/upload/',
     )
 
-    _market_schemas = {
-        'production': 'http://schemas.elite-markets.net/eddn/commodity/2',
-        'test': 'http://schemas.elite-markets.net/eddn/commodity/2/test',
+    _commodity_schemas = {
+        'production': 'http://schemas.elite-markets.net/eddn/commodity/3',
+        'test': 'http://schemas.elite-markets.net/eddn/commodity/3/test',
     }
 
     _shipyard_schemas = {
-        'production': 'http://schemas.elite-markets.net/eddn/shipyard/1',
-        'test': 'http://schemas.elite-markets.net/eddn/shipyard/1/test',
+        'production': 'http://schemas.elite-markets.net/eddn/shipyard/2',
+        'test': 'http://schemas.elite-markets.net/eddn/shipyard/2/test',
     }
 
     _outfitting_schemas = {
-        'production': 'http://schemas.elite-markets.net/eddn/outfitting/1',
-        'test': 'http://schemas.elite-markets.net/eddn/outfitting/1/test',
+        'production': 'http://schemas.elite-markets.net/eddn/outfitting/2',
+        'test': 'http://schemas.elite-markets.net/eddn/outfitting/2/test',
     }
 
     _debug = True
@@ -105,7 +105,7 @@ class EDDN:
     ):
         message = {}
 
-        message['$schemaRef'] = self._market_schemas[('test' if self._debug else 'production')]  # NOQA
+        message['$schemaRef'] = self._commodity_schemas[('test' if self._debug else 'production')]  # NOQA
 
         message['header'] = {
             'uploaderID': self.uploaderID,
@@ -170,3 +170,5 @@ class EDDN:
         }
 
         self.postMessage(message, timestamp)
+
+
