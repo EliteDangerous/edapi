@@ -99,9 +99,10 @@ def Main():
     '''
     # These are the schemas we will decode.
     allowed_schemas = {
-        'http://schemas.elite-markets.net/eddn/commodity/3': 'commodity-v3',
-        'http://schemas.elite-markets.net/eddn/shipyard/2': 'shipyard-v2',
+        'http://schemas.elite-markets.net/eddn/commodity/3':  'commodity-v3',
+        'http://schemas.elite-markets.net/eddn/journal/1':    'journal-v1',
         'http://schemas.elite-markets.net/eddn/outfitting/2': 'outfitting-v2',
+        'http://schemas.elite-markets.net/eddn/shipyard/2':   'shipyard-v2',
     }
 
     # If debug, only listen for test type messages.
