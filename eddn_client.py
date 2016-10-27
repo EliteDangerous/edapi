@@ -167,9 +167,7 @@ def Main():
                     'Received ' + schema +
                     ' ' + message['header']['softwareName'] +
                     ' / ' + message['header']['softwareVersion'] +
-                    ' (' + uploaderID + ')' +
-                    ' : ' + message['message']['systemName'] +
-                    ' / ' + message['message']['stationName']
+                    ' (' + uploaderID + ')'
                 )
 
                 # Check if the software is white listed.
